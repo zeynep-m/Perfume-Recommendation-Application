@@ -88,7 +88,7 @@ class ListPerfumes(tk.Tk):
         # Bind events
         self.tv.bind("<<TreeviewSelect>>", self.on_item_select)
         self.tv.bind("<Double-1>", self.show_edit_window)  # Double-click to edit
-        self.tv.bind("<Delete>", self.delete_perfume)  # Delete key to remove
+        self.tv.bind("<BackSpace>", self.delete_perfume)  # Delete/Backspace key to remove
         self.bind("<F1>", self.show_help)
         self.bind("<F2>", self.show_statistics)  # F2 for statistics
         self.bind("<Control-i>", self.show_add_window)  # Ctrl+I to add new
@@ -247,6 +247,10 @@ class ListPerfumes(tk.Tk):
 
         # Display perfume details
         for col_name, value in zip(columns, perfume_data):
+            # Skip the sources column
+            if col_name == "sources":
+                continue
+                
             frame = ttk.Frame(scrollable_frame)
             frame.pack(fill="x", padx=5, pady=5)
 

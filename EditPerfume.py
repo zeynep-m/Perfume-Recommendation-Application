@@ -26,7 +26,6 @@ class EditPerfume(PerfumeFormWindow):
         self.collection.set(perfume_data[8] or "")
         self.classification.set(perfume_data[9] or "")
         self.subfamily.set(perfume_data[10] or "")
-        self.sources.set(perfume_data[11] or "")
 
     def build_ui(self):
         super().build_ui()
@@ -51,8 +50,7 @@ class EditPerfume(PerfumeFormWindow):
                 longevity=self.longevity.get(),
                 collection=self.collection.get(),
                 classification=self.classification.get(),
-                subfamily=self.subfamily.get(),
-                sources=self.sources.get()
+                subfamily=self.subfamily.get()
             )
             msg.showinfo("Success", "Perfume updated successfully!", parent=self)
             self.destroy()  # Close window after success

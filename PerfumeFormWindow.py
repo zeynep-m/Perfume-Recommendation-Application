@@ -12,7 +12,7 @@ class PerfumeFormWindow(tk.Toplevel):
     def __init__(self, parent=None, title="Perfume Form"):
         super().__init__(parent)
         self.title(title)
-        self.geometry("600x700")
+        self.geometry("600x680")
         self.resizable(False, False)
         
         # String variables for form fields
@@ -24,16 +24,19 @@ class PerfumeFormWindow(tk.Toplevel):
         self.collection = tk.StringVar()
         self.classification = tk.StringVar()
         self.subfamily = tk.StringVar()
-        self.sources = tk.StringVar()
         
         self.db = PerfumeDatabase()
         self.build_ui()
 
     def build_ui(self):
         """Build the form UI"""
+        # Create a container frame for canvas and scrollbar
+        form_frame = ttk.Frame(self)
+        form_frame.pack(fill="both", expand=True)
+
         # Create main canvas with scrollbar for the form
-        canvas = tk.Canvas(self, width=580)
-        scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
+        canvas = tk.Canvas(form_frame, width=580)
+        scrollbar = ttk.Scrollbar(form_frame, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
 
         scrollable_frame.bind(
@@ -114,11 +117,6 @@ class PerfumeFormWindow(tk.Toplevel):
         # Subfamily
         tk.Label(self.main_frame, text="Subfamily").grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.subfamily, width=40).grid(column=1, row=row, **ent_pad)
-        row += 1
-
-        # Sources
-        tk.Label(self.main_frame, text="Sources").grid(column=0, row=row, **lbl_pad)
-        ttk.Entry(self.main_frame, textvariable=self.sources, width=40).grid(column=1, row=row, **ent_pad)
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")

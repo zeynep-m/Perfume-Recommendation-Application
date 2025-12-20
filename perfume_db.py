@@ -62,8 +62,7 @@ class PerfumeDatabase:
                 longevity TEXT,
                 collection TEXT,
                 classification TEXT,
-                subfamily TEXT,
-                sources TEXT
+                subfamily TEXT
             )
             ''')
             
@@ -73,8 +72,8 @@ class PerfumeDatabase:
                 INSERT INTO perfumes (
                     perfume, gender, intensity, ingredients_notes, 
                     season, concept, longevity, collection, 
-                    classification, subfamily, sources
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    classification, subfamily
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     perfume['Perfume'],
                     perfume['Gender'],
@@ -85,8 +84,7 @@ class PerfumeDatabase:
                     perfume['Longevity'],
                     perfume['Collection'],
                     perfume['Classification'],
-                    perfume['Subfamily'],
-                    perfume['Sources']
+                    perfume['Subfamily']
                 ))
             
             conn.commit()
@@ -120,7 +118,7 @@ class PerfumeDatabase:
             cur.execute("DELETE FROM perfumes WHERE id=?", (perfume_id,))
 
     def update_perfume(self, perfume_id, perfume, gender, intensity, ingredients_notes, 
-                      season, concept, longevity, collection, classification, subfamily, sources):
+                      season, concept, longevity, collection, classification, subfamily):
         """Update a perfume record"""
         with self.get_connection() as conn:
             cur = conn.cursor()
@@ -128,23 +126,23 @@ class PerfumeDatabase:
             UPDATE perfumes 
             SET perfume=?, gender=?, intensity=?, ingredients_notes=?, 
                 season=?, concept=?, longevity=?, collection=?, 
-                classification=?, subfamily=?, sources=?
+                classification=?, subfamily=?
             WHERE id=?
             """, (perfume, gender, intensity, ingredients_notes, season, concept, 
-                  longevity, collection, classification, subfamily, sources, perfume_id))
+                  longevity, collection, classification, subfamily, perfume_id))
 
     def add_perfume(self, perfume, gender, intensity, ingredients_notes, 
-                   season, concept, longevity, collection, classification, subfamily, sources):
+                   season, concept, longevity, collection, classification, subfamily):
         """Add a new perfume"""
         with self.get_connection() as conn:
             cur = conn.cursor()
             cur.execute("""
             INSERT INTO perfumes (perfume, gender, intensity, ingredients_notes, 
                                 season, concept, longevity, collection, 
-                                classification, subfamily, sources)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                classification, subfamily)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (perfume, gender, intensity, ingredients_notes, season, concept, 
-                  longevity, collection, classification, subfamily, sources))
+                  longevity, collection, classification, subfamily))
 
     def search_perfumes(self, search_term):
         """Search perfumes by name, gender, or classification"""

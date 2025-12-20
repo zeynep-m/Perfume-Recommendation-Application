@@ -32,8 +32,7 @@ class AddNewPerfume(PerfumeFormWindow):
                 longevity=self.longevity.get(),
                 collection=self.collection.get(),
                 classification=self.classification.get(),
-                subfamily=self.subfamily.get(),
-                sources=self.sources.get()
+                subfamily=self.subfamily.get()
             )
             msg.showinfo("Success", "Perfume added successfully!", parent=self)
             self.destroy()  # Close window after success
