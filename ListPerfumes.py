@@ -222,7 +222,7 @@ class ListPerfumes(tk.Tk):
         # Column names from the database
         columns = ["id", "perfume", "gender", "intensity", "ingredients_notes", 
                   "season", "concept", "longevity", "collection", "classification", 
-                  "subfamily", "sources"]
+                  "subfamily"]
 
         # Create a new window
         details_window = tk.Toplevel(self)
