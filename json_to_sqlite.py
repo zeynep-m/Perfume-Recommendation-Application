@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS perfumes (
     longevity TEXT,
     collection TEXT,
     classification TEXT,
-    subfamily TEXT,
-    sources TEXT
+    subfamily TEXT
 )
 ''')
 
@@ -33,7 +32,7 @@ for perfume in perfumes_data:
     INSERT INTO perfumes (
         perfume, gender, intensity, ingredients_notes, 
         season, concept, longevity, collection, 
-        classification, subfamily, sources
+        classification, subfamily
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         perfume['Perfume'],
@@ -45,8 +44,7 @@ for perfume in perfumes_data:
         perfume['Longevity'],
         perfume['Collection'],
         perfume['Classification'],
-        perfume['Subfamily'],
-        perfume['Sources']
+        perfume['Subfamily']
     ))
 
 # Commit changes and close connection
