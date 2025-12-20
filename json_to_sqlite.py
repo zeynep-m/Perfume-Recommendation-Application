@@ -33,7 +33,7 @@ for perfume in perfumes_data:
         perfume, gender, intensity, ingredients_notes, 
         season, concept, longevity, collection, 
         classification, subfamily
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         perfume['Perfume'],
         perfume['Gender'],
