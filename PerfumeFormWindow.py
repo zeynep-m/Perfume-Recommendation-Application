@@ -4,6 +4,7 @@ from tkinter import messagebox as msg
 from tkinter import scrolledtext
 import sqlite3
 from perfume_db import PerfumeDatabase
+from i18n import _
 
 
 class PerfumeFormWindow(tk.Toplevel):
@@ -11,7 +12,7 @@ class PerfumeFormWindow(tk.Toplevel):
     
     def __init__(self, parent=None, title="Perfume Form"):
         super().__init__(parent)
-        self.title(title)
+        self.title(_(title))
         self.geometry("600x680")
         self.resizable(False, False)
         
@@ -48,7 +49,7 @@ class PerfumeFormWindow(tk.Toplevel):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         # Create the LabelFrame container
-        self.main_frame = ttk.LabelFrame(scrollable_frame, text="Perfume Details")
+        self.main_frame = ttk.LabelFrame(scrollable_frame, text=_("Perfume Details"))
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Configure grid columns
@@ -62,60 +63,60 @@ class PerfumeFormWindow(tk.Toplevel):
         row = 0
 
         # Perfume Name
-        tk.Label(self.main_frame, text="Perfume Name *").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Perfume Name *")).grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.perfume, width=40).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Gender
-        tk.Label(self.main_frame, text="Gender *").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Gender *")).grid(column=0, row=row, **lbl_pad)
         gender_combo = ttk.Combobox(self.main_frame, textvariable=self.gender, width=37, 
-                                    values=["Unisex", "Men", "Women"])
+                        values=[_("Unisex"), _("Men"), _("Women")])
         gender_combo.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Intensity
-        tk.Label(self.main_frame, text="Intensity *").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Intensity *")).grid(column=0, row=row, **lbl_pad)
         intensity_combo = ttk.Combobox(self.main_frame, textvariable=self.intensity, width=37,
-                                      values=["Weak", "Moderate", "Strong", "Very Strong"])
+                          values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Strong")])
         intensity_combo.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Ingredients/Notes (Text widget for multiline)
-        tk.Label(self.main_frame, text="Ingredients/Notes").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Ingredients/Notes")).grid(column=0, row=row, **lbl_pad)
         self.txt_ingredients = tk.Text(self.main_frame, height=4, width=40, wrap="word")
         self.txt_ingredients.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Season
-        tk.Label(self.main_frame, text="Season").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Season")).grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.season, width=40).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Concept (Text widget for multiline)
-        tk.Label(self.main_frame, text="Concept").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Concept")).grid(column=0, row=row, **lbl_pad)
         self.txt_concept = tk.Text(self.main_frame, height=3, width=40, wrap="word")
         self.txt_concept.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Longevity
-        tk.Label(self.main_frame, text="Longevity").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Longevity")).grid(column=0, row=row, **lbl_pad)
         longevity_combo = ttk.Combobox(self.main_frame, textvariable=self.longevity, width=37,
-                                       values=["Weak", "Moderate", "Strong", "Very Long", "Long"])
+                           values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Long"), _("Long")])
         longevity_combo.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Collection
-        tk.Label(self.main_frame, text="Collection").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Collection")).grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.collection, width=40).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Classification
-        tk.Label(self.main_frame, text="Classification").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Classification")).grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.classification, width=40).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Subfamily
-        tk.Label(self.main_frame, text="Subfamily").grid(column=0, row=row, **lbl_pad)
+        tk.Label(self.main_frame, text=_("Subfamily")).grid(column=0, row=row, **lbl_pad)
         ttk.Entry(self.main_frame, textvariable=self.subfamily, width=40).grid(column=1, row=row, **ent_pad)
 
         canvas.pack(side="left", fill="both", expand=True)
@@ -124,15 +125,15 @@ class PerfumeFormWindow(tk.Toplevel):
     def validate_input(self):
         """Validate required fields"""
         if not self.perfume.get().strip():
-            msg.showerror("Error", "Please enter a perfume name.", parent=self)
+            msg.showerror(_("Error"), _("Please enter a perfume name."), parent=self)
             return False
 
         if not self.gender.get().strip():
-            msg.showerror("Error", "Please select a gender.", parent=self)
+            msg.showerror(_("Error"), _("Please select a gender."), parent=self)
             return False
 
         if not self.intensity.get().strip():
-            msg.showerror("Error", "Please select an intensity.", parent=self)
+            msg.showerror(_("Error"), _("Please select an intensity."), parent=self)
             return False
 
         return True

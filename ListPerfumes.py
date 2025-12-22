@@ -4,18 +4,20 @@ from tkinter import messagebox as msg
 import AddNewPerfume
 import EditPerfume
 from perfume_db import PerfumeDatabase
+from i18n import _, toggle_lang, get_toggle_label
 
 
-class ListPerfumes(tk.Tk):
-    """Main window for displaying perfumes in a Treeview"""
-    
-    def __init__(self):
-        super().__init__()
-        self.title("Perfume Recommendation Application")
+class ListPerfumes(tk.Toplevel):
+    """Child window for displaying perfumes in a Treeview"""
+
+    def __init__(self, parent, db=None):
+        super().__init__(parent)
+        self.title(_("Perfume Recommendation Application"))
         self.geometry("1600x600")  # Wider window for more columns
-        self.db = PerfumeDatabase()
+        self.db = db or PerfumeDatabase()
         self.build_ui()
         self.list_perfumes()
+        self.update_ui()
 
     def build_ui(self):
         """Build the user interface"""
@@ -23,14 +25,18 @@ class ListPerfumes(tk.Tk):
         search_frame = ttk.Frame(self)
         search_frame.pack(fill="x", padx=10, pady=10)
 
-        ttk.Label(search_frame, text="Search:").pack(side="left", padx=5)
+        ttk.Label(search_frame, text=_("Search:")).pack(side="left", padx=5)
         
         self.search_var = tk.StringVar()
         self.search_var.trace("w", self.on_search_change)
         search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=30)
         search_entry.pack(side="left", padx=5)
 
-        ttk.Button(search_frame, text="Clear", command=self.clear_search).pack(side="left", padx=5)
+        ttk.Button(search_frame, text=_("Clear"), command=self.clear_search).pack(side="left", padx=5)
+
+        # Language toggle button
+        self.lang_btn = ttk.Button(search_frame, text=get_toggle_label(), command=self.on_toggle_lang)
+        self.lang_btn.pack(side="right")
 
         # Create a container frame for Treeview and Scrollbars
         container = tk.Frame(self)
@@ -49,16 +55,16 @@ class ListPerfumes(tk.Tk):
         self.tv.configure(yscrollcommand=self.tv_scroll_y.set, xscrollcommand=self.tv_scroll_x.set)
 
         # Add headings for each column
-        self.tv.heading("id", text="ID", anchor="center")
-        self.tv.heading("perfume", text="Perfume Name", anchor="center")
-        self.tv.heading("gender", text="Gender", anchor="center")
-        self.tv.heading("intensity", text="Intensity", anchor="center")
-        self.tv.heading("ingredients", text="Ingredients/Notes", anchor="center")
-        self.tv.heading("collection", text="Collection", anchor="center")
-        self.tv.heading("season", text="Season", anchor="center")
-        self.tv.heading("concept", text="Concept", anchor="center")
-        self.tv.heading("classification", text="Classification", anchor="center")
-        self.tv.heading("longevity", text="Longevity", anchor="center")
+        self.tv.heading("id", text=_("ID"), anchor="center")
+        self.tv.heading("perfume", text=_("Perfume Name"), anchor="center")
+        self.tv.heading("gender", text=_("Gender"), anchor="center")
+        self.tv.heading("intensity", text=_("Intensity"), anchor="center")
+        self.tv.heading("ingredients", text=_("Ingredients/Notes"), anchor="center")
+        self.tv.heading("collection", text=_("Collection"), anchor="center")
+        self.tv.heading("season", text=_("Season"), anchor="center")
+        self.tv.heading("concept", text=_("Concept"), anchor="center")
+        self.tv.heading("classification", text=_("Classification"), anchor="center")
+        self.tv.heading("longevity", text=_("Longevity"), anchor="center")
 
         # Configure each column
         self.tv.column("id", anchor="center", width=40, stretch=False)
@@ -110,7 +116,7 @@ class ListPerfumes(tk.Tk):
         # Update info label
         total = self.db.get_total_count()
         displayed = len(perfumes)
-        self.info_label.config(text=f"Displaying {displayed} of {total} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help  |  F2: Stats")
+        self.info_label.config(text=_("Displaying {} of {} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help  |  F2: Stats").format(displayed, total))
 
     def on_search_change(self, *args):
         """Called when search text changes"""
@@ -180,8 +186,8 @@ class ListPerfumes(tk.Tk):
         if not self.tv.selection():
             return
 
-        answer = msg.askyesno(title="Confirm Delete", 
-                             message="Are you sure you want to delete the selected perfume?")
+        answer = msg.askyesno(title=_("Confirm Delete"), 
+                     message=_("Are you sure you want to delete the selected perfume?"))
         if answer:
             for i in self.tv.selection():
                 selected_row = self.tv.item(i)["values"]
@@ -194,7 +200,7 @@ class ListPerfumes(tk.Tk):
             # Update the info label
             total = self.db.get_total_count()
             displayed = len(self.tv.get_children())
-            self.info_label.config(text=f"Displaying {displayed} of {total} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help")
+            self.info_label.config(text=_("Displaying {} of {} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help  |  F2: Stats").format(displayed, total))
 
     def show_details(self, event):
         """Show full details of selected perfume in a popup window"""
@@ -226,7 +232,7 @@ class ListPerfumes(tk.Tk):
 
         # Create a new window
         details_window = tk.Toplevel(self)
-        details_window.title("Perfume Details")
+        details_window.title(_("Perfume Details"))
         details_window.geometry("600x500")
 
         # Create a frame with scrollbar for details
@@ -246,6 +252,21 @@ class ListPerfumes(tk.Tk):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         # Display perfume details
+        display_map = {
+            "id": _("ID"),
+            "perfume": _("Perfume Name"),
+            "gender": _("Gender"),
+            "intensity": _("Intensity"),
+            "ingredients_notes": _("Ingredients/Notes"),
+            "season": _("Season"),
+            "concept": _("Concept"),
+            "longevity": _("Longevity"),
+            "collection": _("Collection"),
+            "classification": _("Classification"),
+            "subfamily": _("Subfamily"),
+            "sources": "sources",
+        }
+
         for col_name, value in zip(columns, perfume_data):
             # Skip the sources column
             if col_name == "sources":
@@ -254,7 +275,8 @@ class ListPerfumes(tk.Tk):
             frame = ttk.Frame(scrollable_frame)
             frame.pack(fill="x", padx=5, pady=5)
 
-            label = ttk.Label(frame, text=f"{col_name.replace('_', ' ').title()}:", 
+            disp = display_map.get(col_name, col_name.replace('_', ' ').title())
+            label = ttk.Label(frame, text=f"{disp}:", 
                             font=("Arial", 10, "bold"), width=20)
             label.pack(side="left")
 
@@ -269,26 +291,26 @@ class ListPerfumes(tk.Tk):
         stats = self.db.get_statistics()
         
         # Build statistics message
-        stats_text = f"PERFUME DATABASE STATISTICS\n\n"
-        stats_text += f"Total Perfumes: {stats['total']}\n\n"
+        stats_text = _("PERFUME DATABASE STATISTICS\n\n")
+        stats_text += _("Total Perfumes: {}\n\n").format(stats['total'])
         
-        stats_text += "By Gender:\n"
+        stats_text += _("By Gender:\n")
         for gender, count in stats['gender']:
             stats_text += f"  • {gender}: {count}\n"
         
-        stats_text += "\nBy Intensity:\n"
+        stats_text += _("\nBy Intensity:\n")
         for intensity, count in stats['intensity']:
             stats_text += f"  • {intensity}: {count}\n"
         
-        stats_text += "\nTop 5 Classifications:\n"
+        stats_text += _("\nTop 5 Classifications:\n")
         for classification, count in stats['classification']:
             stats_text += f"  • {classification}: {count}\n"
         
-        msg.showinfo("Perfume Statistics", stats_text)
+        msg.showinfo(_("Perfume Statistics"), stats_text)
 
     def show_help(self, event=None):
         """Show help information"""
-        help_text = """
+        help_text = _("""
 PERFUME RECOMMENDATION APPLICATION - HELP
 
 Keyboard Shortcuts:
@@ -305,10 +327,35 @@ Features:
   • Edit existing perfume details
   • Delete perfumes from the database
   • View statistics breakdown by gender, intensity, and classification
-        """
-        msg.showinfo("Help", help_text)
+        """)
+        msg.showinfo(_("Help"), help_text)
+
+    def on_toggle_lang(self):
+        toggle_lang()
+        self.update_ui()
+
+    def update_ui(self):
+        self.title(_("Perfume Recommendation Application"))
+        # Update column headings
+        self.tv.heading("id", text=_("ID"))
+        self.tv.heading("perfume", text=_("Perfume Name"))
+        self.tv.heading("gender", text=_("Gender"))
+        self.tv.heading("intensity", text=_("Intensity"))
+        self.tv.heading("ingredients", text=_("Ingredients/Notes"))
+        self.tv.heading("collection", text=_("Collection"))
+        self.tv.heading("season", text=_("Season"))
+        self.tv.heading("concept", text=_("Concept"))
+        self.tv.heading("classification", text=_("Classification"))
+        self.tv.heading("longevity", text=_("Longevity"))
+        # Update info label text with current counts
+        total = self.db.get_total_count()
+        displayed = len(self.tv.get_children())
+        self.info_label.config(text=_("Displaying {} of {} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help  |  F2: Stats").format(displayed, total))
+        # Update language button label
+        self.lang_btn.config(text=get_toggle_label())
 
 
 if __name__ == "__main__":
-    app = ListPerfumes()
-    app.mainloop()
+    root = tk.Tk()
+    app = ListPerfumes(root)
+    root.mainloop()

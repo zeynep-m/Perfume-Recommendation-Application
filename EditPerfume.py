@@ -2,6 +2,7 @@ from tkinter import ttk
 from tkinter import messagebox as msg
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
+from i18n import _
 
 
 class EditPerfume(PerfumeFormWindow):
@@ -13,7 +14,7 @@ class EditPerfume(PerfumeFormWindow):
         perfume_data is a tuple from the database with all fields
         """
         self.perfume_id = perfume_data[0]
-        super().__init__(parent, "Edit Perfume")
+        super().__init__(parent, _("Edit Perfume"))
         
         # Populate fields with existing data
         self.perfume.set(perfume_data[1])
@@ -30,7 +31,7 @@ class EditPerfume(PerfumeFormWindow):
     def build_ui(self):
         super().build_ui()
         # Add Update button
-        self.btn_update = ttk.Button(self, text="Update Perfume", command=self.update_perfume)
+        self.btn_update = ttk.Button(self, text=_("Update Perfume"), command=self.update_perfume)
         self.btn_update.pack(side="bottom", pady=10, padx=10)
 
     def update_perfume(self):
@@ -52,7 +53,7 @@ class EditPerfume(PerfumeFormWindow):
                 classification=self.classification.get(),
                 subfamily=self.subfamily.get()
             )
-            msg.showinfo("Success", "Perfume updated successfully!", parent=self)
+            msg.showinfo(_("Success"), _("Perfume updated successfully!"), parent=self)
             self.destroy()  # Close window after success
         except sqlite3.Error as e:
-            msg.showerror("Database Error", f"Database error occurred: {e}", parent=self)
+            msg.showerror(_("Database Error"), f"Database error occurred: {e}", parent=self)

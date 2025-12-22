@@ -2,18 +2,19 @@ from tkinter import ttk
 from tkinter import messagebox as msg
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
+from i18n import _
 
 
 class AddNewPerfume(PerfumeFormWindow):
     """Window for adding a new perfume"""
     
     def __init__(self, parent=None):
-        super().__init__(parent, "Add New Perfume")
+        super().__init__(parent, _("Add New Perfume"))
 
     def build_ui(self):
         super().build_ui()
         # Add Save button
-        self.btn_save = ttk.Button(self, text="Save Perfume", command=self.save_perfume)
+        self.btn_save = ttk.Button(self, text=_("Save Perfume"), command=self.save_perfume)
         self.btn_save.pack(side="bottom", pady=10, padx=10)
 
     def save_perfume(self):
@@ -34,7 +35,7 @@ class AddNewPerfume(PerfumeFormWindow):
                 classification=self.classification.get(),
                 subfamily=self.subfamily.get()
             )
-            msg.showinfo("Success", "Perfume added successfully!", parent=self)
+            msg.showinfo(_("Success"), _("Perfume added successfully!"), parent=self)
             self.destroy()  # Close window after success
         except sqlite3.Error as e:
-            msg.showerror("Database Error", f"Database error occurred: {e}", parent=self)
+            msg.showerror(_("Database Error"), f"Database error occurred: {e}", parent=self)
