@@ -49,7 +49,36 @@ class PerfumeDatabase:
         with self.get_connection() as conn:
             cur = conn.cursor()
             
-            # Create table
+            # Create controlled vocabulary tables for normalization
+            cur.execute('''
+            CREATE TABLE IF NOT EXISTS gender_vocab (
+                id INTEGER PRIMARY KEY,
+                value TEXT UNIQUE NOT NULL
+            )
+            ''')
+            
+            cur.execute('''
+            CREATE TABLE IF NOT EXISTS classification_vocab (
+                id INTEGER PRIMARY KEY,
+                value TEXT UNIQUE NOT NULL
+            )
+            ''')
+            
+            cur.execute('''
+            CREATE TABLE IF NOT EXISTS season_vocab (
+                id INTEGER PRIMARY KEY,
+                value TEXT UNIQUE NOT NULL
+            )
+            ''')
+            
+            cur.execute('''
+            CREATE TABLE IF NOT EXISTS intensity_vocab (
+                id INTEGER PRIMARY KEY,
+                value TEXT UNIQUE NOT NULL
+            )
+            ''')
+            
+            # Create main perfumes table
             cur.execute('''
             CREATE TABLE IF NOT EXISTS perfumes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,7 +95,17 @@ class PerfumeDatabase:
             )
             ''')
             
-            # Insert data from JSON
+            # Populate vocabulary tables from perfumes data (if not already populated)
+            for perfume in perfumes_data:
+                try:
+                    cur.execute("INSERT OR IGNORE INTO gender_vocab (value) VALUES (?)", (perfume['Gender'],))
+                    cur.execute("INSERT OR IGNORE INTO classification_vocab (value) VALUES (?)", (perfume['Classification'],))
+                    cur.execute("INSERT OR IGNORE INTO season_vocab (value) VALUES (?)", (perfume['Season'],))
+                    cur.execute("INSERT OR IGNORE INTO intensity_vocab (value) VALUES (?)", (perfume['Intensity'],))
+                except Exception:
+                    pass
+            
+            # Insert perfume data
             for perfume in perfumes_data:
                 cur.execute('''
                 INSERT INTO perfumes (
@@ -88,7 +127,7 @@ class PerfumeDatabase:
                 ))
             
             conn.commit()
-            print("Database initialized from perfumes.json")
+            print("Database initialized from perfumes.json with controlled vocabularies")
 
     def get_perfumes(self):
         """Retrieve all perfumes from the database"""
@@ -185,7 +224,21 @@ class PerfumeDatabase:
                 'classification': classification_counts
             }
 
+    def get_vocab(self, vocab_type):
+        """Get controlled vocabulary list for dropdowns"""
+        table_map = {
+            'gender': 'gender_vocab',
+            'classification': 'classification_vocab',
+            'season': 'season_vocab',
+            'intensity': 'intensity_vocab'
+        }
+        
+        table_name = table_map.get(vocab_type)
+        if not table_name:
+            return []
+        
+        with self.get_connection() as conn:
+            cur = conn.cursor()
+            cur.execute(f"SELECT value FROM {table_name} ORDER BY value")
+            return [row[0] for row in cur.fetchall()]
 
-if __name__ == '__main__':
-    db = PerfumeDatabase()
-    print("Database initialized.")

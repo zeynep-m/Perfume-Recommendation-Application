@@ -54,6 +54,8 @@ class EditPerfume(PerfumeFormWindow):
                 subfamily=self.subfamily.get()
             )
             msg.showinfo(_("Success"), _("Perfume updated successfully!"), parent=self)
+            # Fire custom event to notify listeners
+            self.event_generate("<<PerfumeUpdated>>")
             self.destroy()  # Close window after success
         except sqlite3.Error as e:
             msg.showerror(_("Database Error"), f"Database error occurred: {e}", parent=self)

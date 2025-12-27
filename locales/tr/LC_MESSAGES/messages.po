@@ -1,0 +1,1243 @@
+# Turkish translations for Perfume Recommendation Application
+# Copyright (C) 2025
+# This file is distributed under the same license as the Perfume Recommendation Application.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2025-12-27 12:00+0300\n"
+"PO-Revision-Date: 2025-12-27 12:00+0300\n"
+"Last-Translator: \n"
+"Language-Team: Turkish\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# =============================================================================
+# UI STRINGS
+# =============================================================================
+
+# Generic / navigation
+msgid "Perfume Recommender"
+msgstr "Parfüm Önerici"
+
+msgid "Perfume Recommendation Application"
+msgstr "Parfüm Öneri Uygulaması"
+
+msgid "Open Perfume DB"
+msgstr "Parfüm Veritabanını Aç"
+
+msgid "Project Info"
+msgstr "Proje Bilgisi"
+
+msgid "Clear"
+msgstr "Temizle"
+
+msgid "Get Recommendation"
+msgstr "Öneri Al"
+
+msgid "Results"
+msgstr "Sonuçlar"
+
+msgid "Your Results"
+msgstr "Sonuçlarınız"
+
+msgid "Selected Profile"
+msgstr "Seçilen Profil"
+
+msgid "Recommended Dior Perfumes (Demo)"
+msgstr "Önerilen Dior Parfümleri (Demo)"
+
+msgid "Close"
+msgstr "Kapat"
+
+msgid "Project Information"
+msgstr "Proje Bilgileri"
+
+msgid "Overview"
+msgstr "Genel Bakış"
+
+msgid "Select your preferences to generate a personalized Dior profile.\nRecommendations are currently shown as a demo (mock) list."
+msgstr "Kişisel Dior profilinizi oluşturmak için tercihlerinizi seçin.\nÖneriler şu anda demo (örnek) liste olarak gösterilmektedir."
+
+# Filter labels
+msgid "Select Gender:"
+msgstr "Cinsiyet Seçin:"
+
+msgid "Select Occasion:"
+msgstr "Kullanım Amacı Seçin:"
+
+msgid "Select Season:"
+msgstr "Mevsim Seçin:"
+
+msgid "Select Longevity:"
+msgstr "Kalıcılık Seçin:"
+
+msgid "Select Sensitivity:"
+msgstr "Hassasiyet Seçin:"
+
+msgid "Select Classification:"
+msgstr "Sınıflandırma Seçin:"
+
+# Category labels
+msgid "Gender"
+msgstr "Cinsiyet"
+
+msgid "Occasion"
+msgstr "Kullanım Amacı"
+
+msgid "Season"
+msgstr "Mevsim"
+
+msgid "Longevity"
+msgstr "Kalıcılık"
+
+msgid "Sensitivity"
+msgstr "Hassasiyet"
+
+msgid "Classification"
+msgstr "Sınıflandırma"
+
+# List window
+msgid "Search:"
+msgstr "Ara:"
+
+msgid "ID"
+msgstr "ID"
+
+msgid "Perfume Name"
+msgstr "Parfüm Adı"
+
+msgid "Intensity"
+msgstr "Yoğunluk"
+
+msgid "Ingredients/Notes"
+msgstr "İçerik/Notlar"
+
+msgid "Collection"
+msgstr "Koleksiyon"
+
+msgid "Concept"
+msgstr "Kavram"
+
+msgid "Add (Ctrl+I)"
+msgstr "Ekle (Ctrl+I)"
+
+msgid "Delete"
+msgstr "Sil"
+
+msgid "Statistics (F2)"
+msgstr "İstatistikler (F2)"
+
+msgid "Displaying {} of {} perfumes"
+msgstr "Toplam {} parfümden {} gösteriliyor"
+
+msgid "Displaying {} of {} perfumes  |  Ctrl+I: Add  |  Double-click: Edit  |  Delete: Remove  |  F1: Help  |  F2: Stats"
+msgstr "Toplam {} parfümden {} gösteriliyor  |  Ctrl+I: Ekle  |  Çift tık: Düzenle  |  Delete: Sil  |  F1: Yardım  |  F2: İstatistik"
+
+msgid "Confirm Delete"
+msgstr "Silmeyi Onayla"
+
+msgid "Are you sure you want to delete the selected perfume?"
+msgstr "Seçili parfümü silmek istediğinizden emin misiniz?"
+
+msgid "Perfume Details"
+msgstr "Parfüm Detayları"
+
+msgid "Perfume Statistics"
+msgstr "Parfüm İstatistikleri"
+
+msgid "PERFUME DATABASE STATISTICS\n\n"
+msgstr "PARFÜM VERİTABANI İSTATİSTİKLERİ\n\n"
+
+msgid "Total Perfumes: {}\n\n"
+msgstr "Toplam Parfüm: {}\n\n"
+
+msgid "By Gender:\n"
+msgstr "Cinsiyete Göre:\n"
+
+msgid "\nBy Intensity:\n"
+msgstr "\nYoğunluğa Göre:\n"
+
+msgid "\nTop 5 Classifications:\n"
+msgstr "\nEn Çok 5 Sınıflandırma:\n"
+
+msgid "Help"
+msgstr "Yardım"
+
+msgid ""
+"\n"
+"PERFUME RECOMMENDATION APPLICATION - HELP\n"
+"\n"
+"Keyboard Shortcuts:\n"
+"  • Ctrl+I: Add new perfume\n"
+"  • Double-click: Edit selected perfume\n"
+"  • Delete: Remove selected perfume\n"
+"  • F1: Show this help message\n"
+"  • F2: Show database statistics\n"
+"\n"
+"Features:\n"
+"  • View all perfumes in the database\n"
+"  • Search and filter perfumes by name, gender, classification, ingredients, or season\n"
+"  • Add new perfumes to the collection\n"
+"  • Edit existing perfume details\n"
+"  • Delete perfumes from the database\n"
+"  • View statistics breakdown by gender, intensity, and classification\n"
+"        "
+msgstr ""
+"\n"
+"PARFÜM ÖNERİ UYGULAMASI - YARDIM\n"
+"\n"
+"Klavye Kısayolları:\n"
+"  • Ctrl+I: Yeni parfüm ekle\n"
+"  • Çift tık: Seçili parfümü düzenle\n"
+"  • Delete: Seçili parfümü sil\n"
+"  • F1: Bu yardım penceresini göster\n"
+"  • F2: Veritabanı istatistiklerini göster\n"
+"\n"
+"Özellikler:\n"
+"  • Veritabanındaki tüm parfümleri görüntüleme\n"
+"  • Parfümleri ada, cinsiyete, sınıflandırmaya, içeriğe veya mevsime göre arama/filtreleme\n"
+"  • Koleksiyona yeni parfüm ekleme\n"
+"  • Var olan parfüm ayrıntılarını düzenleme\n"
+"  • Parfümleri veritabanından silme\n"
+"  • Cinsiyet, yoğunluk ve sınıflandırmaya göre istatistikleri görüntüleme\n"
+"        "
+
+# Form window
+msgid "Perfume Form"
+msgstr "Parfüm Formu"
+
+msgid "Perfume Name *"
+msgstr "Parfüm Adı *"
+
+msgid "Gender *"
+msgstr "Cinsiyet *"
+
+msgid "Intensity *"
+msgstr "Yoğunluk *"
+
+msgid "Subfamily"
+msgstr "Alt aile"
+
+# Messages
+msgid "Add New Perfume"
+msgstr "Yeni Parfüm Ekle"
+
+msgid "Edit Perfume"
+msgstr "Parfümü Düzenle"
+
+msgid "Save Perfume"
+msgstr "Parfümü Kaydet"
+
+msgid "Update Perfume"
+msgstr "Parfümü Güncelle"
+
+msgid "Success"
+msgstr "Başarılı"
+
+msgid "Perfume added successfully!"
+msgstr "Parfüm başarıyla eklendi!"
+
+msgid "Perfume updated successfully!"
+msgstr "Parfüm başarıyla güncellendi!"
+
+msgid "Database Error"
+msgstr "Veritabanı Hatası"
+
+msgid "Error"
+msgstr "Hata"
+
+msgid "Please enter a perfume name."
+msgstr "Lütfen bir parfüm adı girin."
+
+msgid "Please select a gender."
+msgstr "Lütfen bir cinsiyet seçin."
+
+msgid "Please select an intensity."
+msgstr "Lütfen bir yoğunluk seçin."
+
+msgid "Note: This list is a mock output. The database + matching logic will be integrated by the data module."
+msgstr "Not: Bu liste örnek amaçlıdır. Veritabanı ve eşleştirme mantığı daha sonra eklenecektir."
+
+# =============================================================================
+# DATABASE VALUES - Complete vocabulary from all 277 unique words
+# =============================================================================
+
+# Punctuation & special
+msgid "&"
+msgstr "&"
+
+msgid "6–8h"
+msgstr "6–8 saat"
+
+# A
+msgid "accords"
+msgstr "akortlar"
+
+msgid "addictive"
+msgstr "bağımlılık yapan"
+
+msgid "Addictive"
+msgstr "Bağımlılık Yapan"
+
+msgid "airy"
+msgstr "havadar"
+
+msgid "alcohol"
+msgstr "alkol"
+
+msgid "Aldehydes"
+msgstr "Aldehitler"
+
+msgid "Aldehydic"
+msgstr "Aldehitli"
+
+msgid "All"
+msgstr"Tüm"
+
+msgid "All seasons"
+msgstr "Tüm mevsimler"
+
+msgid "All seasons (slightly cooler preference)"
+msgstr "Tüm mevsimler (biraz daha serin tercih)"
+
+msgid "almond"
+msgstr "badem"
+
+msgid "Amber"
+msgstr "Amber"
+
+msgid "amber"
+msgstr "amber"
+
+msgid "Ambery"
+msgstr "Amberli"
+
+msgid "ambroxan"
+msgstr "ambroxan"
+
+msgid "apricot"
+msgstr "kayısı"
+
+msgid "Aquatic"
+msgstr "Su"
+
+msgid "Aromatic"
+msgstr "Aromatik"
+
+msgid "Artistic"
+msgstr "Sanatsal"
+
+msgid "authority"
+msgstr "otorite"
+
+msgid "Autumn"
+msgstr "Sonbahar"
+
+# B
+msgid "basil"
+msgstr "fesleğen"
+
+msgid "bean"
+msgstr "fasulye"
+
+msgid "benzoin"
+msgstr "benzoin"
+
+msgid "Bergamot"
+msgstr "Bergamot"
+
+msgid "bergamot"
+msgstr "bergamot"
+
+msgid "berries"
+msgstr "meyveler"
+
+msgid "blossom"
+msgstr "çiçek açma"
+
+msgid "Bold"
+msgstr "Cesur"
+
+msgid "bold"
+msgstr "cesur"
+
+msgid "Bourbon"
+msgstr "Burbon"
+
+msgid "bright"
+msgstr "parlak"
+
+msgid "Bulgarian"
+msgstr "Bulgar"
+
+# C
+msgid "cacao"
+msgstr "kakao"
+
+msgid "Calm"
+msgstr "Sakin"
+
+msgid "calm"
+msgstr "sakin"
+
+msgid "caramel"
+msgstr "karamel"
+
+msgid "cardamom"
+msgstr "kakule"
+
+msgid "carefree"
+msgstr "kaygısız"
+
+msgid "casual"
+msgstr "gündelik"
+
+msgid "cedar"
+msgstr "sedir"
+
+msgid "Centifolia"
+msgstr "Centifolia"
+
+msgid "Cheerful"
+msgstr "Neşeli"
+
+msgid "Cherry"
+msgstr "Kiraz"
+
+msgid "Chypre"
+msgstr "Chypre"
+
+msgid "chypre"
+msgstr "chypre"
+
+msgid "cinnamon"
+msgstr "tarçın"
+
+msgid "Citrus"
+msgstr "Narenciye"
+
+msgid "citrus"
+msgstr "narenciye"
+
+msgid "Classic"
+msgstr "Klasik"
+
+msgid "classic"
+msgstr "klasik"
+
+msgid "Clean"
+msgstr "Temiz"
+
+msgid "clean"
+msgstr "temiz"
+
+msgid "clove"
+msgstr "karanfil"
+
+msgid "coastal"
+msgstr "kıyı"
+
+msgid "Coconut"
+msgstr "Hindistan Cevizi"
+
+msgid "coconut"
+msgstr "hindistan cevizi"
+
+msgid "coffee"
+msgstr "kahve"
+
+msgid "Colourful"
+msgstr "Renkli"
+
+msgid "comforting"
+msgstr "rahatlatıcı"
+
+msgid "Concentrated"
+msgstr "Konsantre"
+
+msgid "confidence"
+msgstr "güven"
+
+msgid "Confident"
+msgstr "Kendinden Emin"
+
+msgid "confident"
+msgstr "kendinden emin"
+
+msgid "contemplative"
+msgstr "düşünceli"
+
+msgid "Cooler"
+msgstr "Serin"
+
+msgid "cooler"
+msgstr "serin"
+
+msgid "Cooler / evening"
+msgstr "Daha serin / akşam"
+
+msgid "Cooler months / evening"
+msgstr "Daha serin aylar / akşam"
+
+msgid "coumarin"
+msgstr "kumarin"
+
+msgid "couture"
+msgstr "kutur"
+
+msgid "creamy"
+msgstr "kremsi"
+
+msgid "crisp"
+msgstr "canlı"
+
+# D
+msgid "Daily"
+msgstr "Günlük"
+
+msgid "Dark"
+msgstr "Koyu"
+
+msgid "dark"
+msgstr "koyu"
+
+msgid "Day"
+msgstr "Gün"
+
+msgid "Deep"
+msgstr "Derin"
+
+msgid "deep"
+msgstr "derin"
+
+msgid "delicate"
+msgstr "narin"
+
+msgid "dominant"
+msgstr "baskın"
+
+msgid "dramatic"
+msgstr "dramatik"
+
+# E
+msgid "earthy"
+msgstr "toprak"
+
+msgid "Elegant"
+msgstr "Zarif"
+
+msgid "elegant"
+msgstr "zarif"
+
+msgid "elegance"
+msgstr "zarafet"
+
+msgid "Energetic"
+msgstr "Enerjik"
+
+msgid "enveloping"
+msgstr "sarmalayan"
+
+msgid "Evening"
+msgstr "Akşam"
+
+msgid "evening"
+msgstr "akşam"
+
+msgid "everyday"
+msgstr "her gün"
+
+msgid "Exotic"
+msgstr "Egzotik"
+
+msgid "expressive"
+msgstr "etkileyici"
+
+# F
+msgid "Fall"
+msgstr "Sonbahar"
+
+msgid "Fall / Winter"
+msgstr "Sonbahar / Kış"
+
+msgid "Fall / Winter / Night"
+msgstr "Sonbahar / Kış / Gece"
+
+msgid "Female"
+msgstr "Kadın"
+
+msgid "femininity"
+msgstr "kadınsılık"
+
+msgid "festive"
+msgstr "şenlikli"
+
+msgid "Fig"
+msgstr "İncir"
+
+msgid "Floral"
+msgstr "Çiçeksi"
+
+msgid "floral"
+msgstr "çiçeksi"
+
+msgid "florals"
+msgstr "çiçeksiler"
+
+msgid "Fougere"
+msgstr "Fougere"
+
+msgid "frankincense"
+msgstr "günlük"
+
+msgid "free"
+msgstr "özgür"
+
+msgid "Freedom"
+msgstr "Özgürlük"
+
+msgid "freesia"
+msgstr "freesia"
+
+msgid "Fresh"
+msgstr "Taze"
+
+msgid "fresh"
+msgstr "taze"
+
+msgid "freshness"
+msgstr "tazelik"
+
+msgid "Fruits"
+msgstr "Meyveler"
+
+msgid "Fruity"
+msgstr "Meyveli"
+
+msgid "fruity"
+msgstr "meyveli"
+
+# G
+msgid "gardenia"
+msgstr "gardenia"
+
+msgid "ginger"
+msgstr "zencefil"
+
+msgid "glamorous"
+msgstr "göz alıcı"
+
+msgid "Gourmand"
+msgstr "Gurme"
+
+msgid "grapefruit"
+msgstr "greyfurt"
+
+msgid "Grasse"
+msgstr "Grasse"
+
+msgid "Green"
+msgstr "Yeşil"
+
+msgid "green"
+msgstr "yeşil"
+
+# H
+msgid "Happy"
+msgstr "Mutlu"
+
+msgid "hedione"
+msgstr "hedione"
+
+msgid "High"
+msgstr "Yüksek"
+
+msgid "honey"
+msgstr "bal"
+
+msgid "honeyed"
+msgstr "ballı"
+
+# I
+msgid "iconic"
+msgstr "ikonik"
+
+msgid "incense"
+msgstr "tütsü"
+
+msgid "indulgent"
+msgstr "kendine düşkün"
+
+msgid "innocence"
+msgstr "masumiyet"
+
+msgid "inspired"
+msgstr "ilham verici"
+
+msgid "Intense"
+msgstr "Yoğun"
+
+msgid "intense"
+msgstr "yoğun"
+
+msgid "Intensified"
+msgstr "Yoğunlaştırılmış"
+
+msgid "intensified"
+msgstr "yoğunlaştırılmış"
+
+msgid "Intimate"
+msgstr "Samimi"
+
+msgid "Iris"
+msgstr "İris"
+
+msgid "iris"
+msgstr "iris"
+
+# J
+msgid "Jasmine"
+msgstr "Yasemin"
+
+msgid "jasmine"
+msgstr "yasemin"
+
+msgid "joy"
+msgstr "neşe"
+
+msgid "Joyful"
+msgstr "Neşeli"
+
+msgid "joyful"
+msgstr "neşeli"
+
+# L
+msgid "labdanum"
+msgstr "labdanum"
+
+msgid "Lavender"
+msgstr "Lavanta"
+
+msgid "lavender"
+msgstr "lavanta"
+
+msgid "leaf"
+msgstr "yaprak"
+
+msgid "Leather"
+msgstr "Deri"
+
+msgid "leather"
+msgstr "deri"
+
+msgid "Lemon"
+msgstr "Limon"
+
+msgid "lemon"
+msgstr "limon"
+
+msgid "Light"
+msgstr "Hafif"
+
+msgid "light"
+msgstr "hafif"
+
+msgid "Lighter"
+msgstr "Daha Hafif"
+
+msgid "Lily"
+msgstr "Zambak"
+
+msgid "lily"
+msgstr "zambak"
+
+msgid "lively"
+msgstr "canlı"
+
+msgid "Long"
+msgstr "Uzun"
+
+msgid "Low"
+msgstr "Düşük"
+
+msgid "luminous"
+msgstr "parlak"
+
+msgid "Luxurious"
+msgstr "Lüks"
+
+msgid "luxurious"
+msgstr "lüks"
+
+msgid "luxury"
+msgstr "lüks"
+
+# M
+msgid "Majestic"
+msgstr "Görkemli"
+
+msgid "Male"
+msgstr "Erkek"
+
+msgid "Man"
+msgstr "Erkek"
+
+msgid "Marine"
+msgstr "Deniz"
+
+msgid "masculine"
+msgstr "erkeksi"
+
+msgid "masculinity"
+msgstr "erkeklik"
+
+msgid "Medium"
+msgstr "Orta"
+
+msgid "minimalist"
+msgstr "minimalist"
+
+msgid "Minimalist"
+msgstr "Minimalist"
+
+msgid "mint"
+msgstr "nane"
+
+msgid "Moderate"
+msgstr "Orta"
+
+msgid "Moderate (6–8h)"
+msgstr "Orta (6–8 saat)"
+
+msgid "Moderate-Long"
+msgstr "Orta-Uzun"
+
+msgid "Modern"
+msgstr "Modern"
+
+msgid "modern"
+msgstr "modern"
+
+msgid "months"
+msgstr "aylar"
+
+msgid "Musk"
+msgstr "Misk"
+
+msgid "musk"
+msgstr "misk"
+
+msgid "Musky"
+msgstr "Miskli"
+
+msgid "musks"
+msgstr "miskler"
+
+msgid "myrrh"
+msgstr "mür"
+
+msgid "Mysterious"
+msgstr "Gizemli"
+
+msgid "mysterious"
+msgstr "gizemli"
+
+msgid "Mystical"
+msgstr "Mistik"
+
+# N
+msgid "Natural"
+msgstr "Doğal"
+
+msgid "nature"
+msgstr "doğa"
+
+msgid "Neroli"
+msgstr "Neroli"
+
+msgid "Night"
+msgstr "Gece"
+
+msgid "Night Out"
+msgstr "Gece"
+
+msgid "notes"
+msgstr "notalar"
+
+msgid "nutmeg"
+msgstr "muskat"
+
+# O
+msgid "oakmoss"
+msgstr "meşe yosunu"
+
+msgid "of"
+msgstr "ile"
+
+msgid "Office"
+msgstr "Ofis"
+
+msgid "oil"
+msgstr "yağ"
+
+msgid "opoponax"
+msgstr "opoponaks"
+
+msgid "optimistic"
+msgstr "iyimser"
+
+msgid "opulent"
+msgstr "gösterişli"
+
+msgid "Orange"
+msgstr "Portakal"
+
+msgid "orange"
+msgstr "portakal"
+
+msgid "Oriental"
+msgstr "Oryantal"
+
+msgid "oriental"
+msgstr "oryantal"
+
+msgid "Oud"
+msgstr "Ud"
+
+msgid "oud"
+msgstr "ud"
+
+# P
+msgid "Patchouli"
+msgstr "Paçuli"
+
+msgid "patchouli"
+msgstr "paçuli"
+
+msgid "pear"
+msgstr "armut"
+
+msgid "Peony"
+msgstr "Şakayık"
+
+msgid "peony"
+msgstr "şakayık"
+
+msgid "pepper"
+msgstr "biber"
+
+msgid "pine"
+msgstr "çam"
+
+msgid "playful"
+msgstr "oyuncu"
+
+msgid "Plum"
+msgstr "Erik"
+
+msgid "poetic"
+msgstr "şairane"
+
+msgid "power"
+msgstr "güç"
+
+msgid "powerful"
+msgstr "güçlü"
+
+msgid "preference"
+msgstr "tercih"
+
+msgid "Pure"
+msgstr "Saf"
+
+# R
+msgid "radiant"
+msgstr "ışıltılı"
+
+msgid "raw"
+msgstr "ham"
+
+msgid "rebellion"
+msgstr "isyan"
+
+msgid "rebellious"
+msgstr "asi"
+
+msgid "Refined"
+msgstr "Rafine"
+
+msgid "refined"
+msgstr "rafine"
+
+msgid "reinterpretation"
+msgstr "yeniden yorum"
+
+msgid "relaxed"
+msgstr "rahat"
+
+msgid "resin"
+msgstr "reçine"
+
+msgid "resinous"
+msgstr "reçineli"
+
+msgid "rich"
+msgstr "zengin"
+
+msgid "romance"
+msgstr "romans"
+
+msgid "Romantic"
+msgstr "Romantik"
+
+msgid "romantic"
+msgstr "romantik"
+
+msgid "Rose"
+msgstr "Gül"
+
+msgid "rose"
+msgstr "gül"
+
+msgid "rosewood"
+msgstr "gül ağacı"
+
+msgid "Rum"
+msgstr "Rom"
+
+msgid "rum"
+msgstr "rom"
+
+# S
+msgid "saffron"
+msgstr "safran"
+
+msgid "sage"
+msgstr "adaçayı"
+
+msgid "salt"
+msgstr "tuz"
+
+msgid "Sandalwood"
+msgstr "Sandal Ağacı"
+
+msgid "sandalwood"
+msgstr "sandal ağacı"
+
+msgid "Sea"
+msgstr "Deniz"
+
+msgid "seasons"
+msgstr "mevsimler"
+
+msgid "seductive"
+msgstr "baştan çıkarıcı"
+
+msgid "Sensual"
+msgstr "Şehvetli"
+
+msgid "sensual"
+msgstr "şehvetli"
+
+msgid "sensuality"
+msgstr "duyusallık"
+
+msgid "Short"
+msgstr "Kısa"
+
+msgid "skin"
+msgstr "cilt"
+
+msgid "slightly"
+msgstr "biraz"
+
+msgid "smoky"
+msgstr "dumanlı"
+
+msgid "Soft"
+msgstr "Yumuşak"
+
+msgid "soft"
+msgstr "yumuşak"
+
+msgid "Solar"
+msgstr "Güneş"
+
+msgid "solar"
+msgstr "güneş"
+
+msgid "Sophisticated"
+msgstr "Sofistike"
+
+msgid "sophisticated"
+msgstr "sofistike"
+
+msgid "spices"
+msgstr "baharatlar"
+
+msgid "Spicy"
+msgstr "Baharatlı"
+
+msgid "spicy"
+msgstr "baharatlı"
+
+msgid "spirited"
+msgstr "canlı"
+
+msgid "Sport"
+msgstr "Spor"
+
+msgid "sporty"
+msgstr "sportif"
+
+msgid "Spring"
+msgstr "İlkbahar"
+
+msgid "Spring / Fall"
+msgstr "İlkbahar / Sonbahar"
+
+msgid "Spring / Summer"
+msgstr "İlkbahar / Yaz"
+
+msgid "strength"
+msgstr "kuvvet"
+
+msgid "Strong"
+msgstr "Güçlü"
+
+msgid "suede"
+msgstr "süet"
+
+msgid "Summer"
+msgstr "Yaz"
+
+msgid "sunny"
+msgstr "güneşli"
+
+msgid "Sweet"
+msgstr "Tatlı"
+
+msgid "sweetness"
+msgstr "tatlılık"
+
+# T
+msgid "Tea"
+msgstr "Çay"
+
+msgid "tender"
+msgstr "hassas"
+
+msgid "the"
+msgstr ""
+
+msgid "Timeless"
+msgstr "Zamansız"
+
+msgid "Tobacco"
+msgstr "Tütün"
+
+msgid "Tonka"
+msgstr "Tonka"
+
+msgid "tonka"
+msgstr "tonka"
+
+msgid "Tuberose"
+msgstr "Tüberöz"
+
+msgid "tuberose"
+msgstr "tüberöz"
+
+# U
+msgid "understated"
+msgstr "sade"
+
+msgid "Unisex"
+msgstr "Uniseks"
+
+msgid "uplifting"
+msgstr "canlandırıcı"
+
+# V
+msgid "valley"
+msgstr "vadi"
+
+msgid "Vanilla"
+msgstr "Vanilya"
+
+msgid "vanilla"
+msgstr "vanilya"
+
+msgid "Very"
+msgstr "Çok"
+
+msgid "Very Long"
+msgstr "Çok Uzun"
+
+msgid "Very Strong"
+msgstr "Çok Güçlü"
+
+msgid "vetiver"
+msgstr "vetiver"
+
+msgid "Vibrant"
+msgstr "Canlı"
+
+msgid "Violet"
+msgstr "Menekşe"
+
+msgid "violet"
+msgstr "menekşe"
+
+# W
+msgid "Warm"
+msgstr "Sıcak"
+
+msgid "warm"
+msgstr "sıcak"
+
+msgid "warmth"
+msgstr "sıcaklık"
+
+msgid "Weak"
+msgstr "Zayıf"
+
+msgid "White"
+msgstr "Beyaz"
+
+msgid "white"
+msgstr "beyaz"
+
+msgid "Winter"
+msgstr "Kış"
+
+msgid "with"
+msgstr "ile"
+
+msgid "Woman"
+msgstr "Kadın"
+
+msgid "wood"
+msgstr "ağaç"
+
+msgid "Woody"
+msgstr "Odunsu"
+
+msgid "woody"
+msgstr "odunsu"
+
+msgid "woods"
+msgstr "ağaçlar"
+
+# Y
+msgid "Ylang"
+msgstr "Ylang"
+
+msgid "ylang"
+msgstr "ylang"
+
+msgid "youthful"
+msgstr "genç"

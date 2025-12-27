@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 from ListPerfumes import ListPerfumes
 from perfume_db import PerfumeDatabase
@@ -13,6 +14,10 @@ root.title(_("Perfume Recommender"))
 root.geometry("560x760")
 
 db = PerfumeDatabase()
+
+# Create menu bar
+menubar = tk.Menu(root)
+root.config(menu=menubar)
 
 TITLE_FONT = ("Arial", 18, "bold")
 H2_FONT = ("Arial", 13, "bold")
@@ -43,10 +48,16 @@ def make_combo(label_text, values, default_index):
 
     var = tk.StringVar()
     combo = ttk.Combobox(root, textvariable=var, state="readonly")
-    combo["values"] = translate_list(values)
+    translated_values = translate_list(values)
+    combo["values"] = translated_values
     combo.current(default_index)
+    # Ensure the visible text is in sync with translated values
+    try:
+        var.set(translated_values[default_index])
+    except Exception:
+        pass
     combo.pack(pady=6)
-    return {"label": label, "combo": combo, "values": values, "default": default_index}
+    return {"label": label, "combo": combo, "values": values, "default": default_index, "var": var}
 
 
 
@@ -131,42 +142,6 @@ def show_selection():
 
 
 
-# Window 3: Project Info / About
-
-def open_about():
-    about_window = tk.Toplevel(root)
-    about_window.title(_("Project Information"))
-    about_window.geometry("560x520")
-
-    header = tk.Label(about_window, text=_("Project Information"), font=("Arial", 16, "bold"))
-    header.pack(pady=(15, 10))
-
-    info_frame = tk.LabelFrame(about_window, text=_("Overview"), font=H2_FONT, padx=12, pady=10)
-    info_frame.pack(padx=18, pady=10, fill="both", expand=True)
-
-    info_text = (
-        "Project: Dior Perfume Recommender\n"
-        "Course: Python GUI Programming\n"
-        "Team: Sinemis Aksoy & Zeynep Mamoori\n\n"
-        "Goal:\n"
-        "• Collect user preferences via a clean GUI\n"
-        "• Generate a recommendation output based on matching rules\n\n"
-        "How it works (UI module):\n"
-        "• Main Window: collects inputs (gender, occasion, season, longevity, sensitivity, classification)\n"
-        "• Results Window: displays the selected profile + a demo recommendation list\n"
-        "• This window: explains the project and system design\n\n"
-        "Future Work:\n"
-        "• Integrate a Dior perfume dataset (database module)\n"
-        "• Replace demo recommendations with real matching results"
-    )
-
-    lbl = tk.Label(info_frame, text=info_text, justify="left", anchor="w", font=TEXT_FONT)
-    lbl.pack(fill="both", expand=True)
-
-    close_btn = tk.Button(about_window, text=_("Close"), width=12, command=about_window.destroy)
-    close_btn.pack(pady=12)
-
-
 def open_database():
     db_window = ListPerfumes(root, db=db)
     db_window.grab_set()
@@ -187,9 +162,6 @@ buttons_frame.pack(pady=24)
 
 db_button = tk.Button(buttons_frame, text=_("Open Perfume DB"), width=16, command=open_database)
 db_button.pack(side="left", padx=10)
-
-about_button = tk.Button(buttons_frame, text=_("Project Info"), width=14, command=open_about)
-about_button.pack(side="left", padx=10)
 
 clear_button = tk.Button(buttons_frame, text=_("Clear"), width=10, command=clear_inputs)
 clear_button.pack(side="left", padx=10)
@@ -215,10 +187,15 @@ def update_ui():
                 "classification": "Select Classification:",
             }[key]
         ))
-        data["combo"]["values"] = translate_list(data["values"])
+        translated_values = translate_list(data["values"])
+        data["combo"]["values"] = translated_values
         data["combo"].current(idx)
+        # Explicitly set visible text to translated selection
+        try:
+            data["var"].set(translated_values[idx])
+        except Exception:
+            pass
     db_button.config(text=_("Open Perfume DB"))
-    about_button.config(text=_("Project Info"))
     clear_button.config(text=_("Clear"))
     select_button.config(text=_("Get Recommendation"))
     lang_btn.config(text=get_toggle_label())
@@ -230,5 +207,56 @@ def on_toggle_lang():
 
 
 lang_btn.config(command=on_toggle_lang)
+
+
+def show_help():
+    """Display help information"""
+    help_text = _("""
+Perfume Recommender Application Help
+
+Instructions:
+1. Select your preferences (gender, occasion, season, longevity, sensitivity, classification)
+2. Click "Get Recommendation" to view personalized recommendations
+3. Click "Open Perfume DB" to manage the perfume database
+4. Use the menu bar for quick access to Language, Database, and Help options
+
+Keyboard Shortcuts:
+• Ctrl+I: Add new perfume (in database window)
+• Double-click: Edit perfume (in database window)
+• Delete: Remove perfume (in database window)
+• F1: Show help (in database window)
+• F2: Show statistics (in database window)
+
+Features:
+• View all perfumes in the database
+• Search and filter perfumes
+• Add new perfumes
+• Edit existing perfumes
+• Delete perfumes
+• View database statistics
+• Toggle between English and Turkish
+    """)
+    messagebox.showinfo(_("Help"), help_text, parent=root)
+
+
+# Menu bar callbacks
+def menu_toggle_lang():
+    on_toggle_lang()
+
+def menu_open_db():
+    open_database()
+
+def menu_show_help():
+    show_help()
+
+# Language menu
+lang_menu = tk.Menu(menubar, tearoff=0)
+menubar.add_cascade(label=_("Language"), menu=lang_menu)
+lang_menu.add_command(label="Türkçe", command=menu_toggle_lang)
+
+# Database menu
+db_menu = tk.Menu(menubar, tearoff=0)
+menubar.add_cascade(label=_("Database"), menu=db_menu)
+db_menu.add_command(label=_("Open Perfume DB"), command=menu_open_db)
 
 root.mainloop()

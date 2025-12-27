@@ -36,6 +36,8 @@ class AddNewPerfume(PerfumeFormWindow):
                 subfamily=self.subfamily.get()
             )
             msg.showinfo(_("Success"), _("Perfume added successfully!"), parent=self)
+            # Fire custom event to notify listeners
+            self.event_generate("<<PerfumeSaved>>")
             self.destroy()  # Close window after success
         except sqlite3.Error as e:
             msg.showerror(_("Database Error"), f"Database error occurred: {e}", parent=self)
