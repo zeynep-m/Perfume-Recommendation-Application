@@ -1241,3 +1241,76 @@ msgstr "ylang"
 
 msgid "youthful"
 msgstr "genç"
+# Menu items
+msgid "Language"
+msgstr "Dil"
+
+msgid "Database"
+msgstr "Veritabanı"
+
+# Main page filters and UI
+msgid "Filters"
+msgstr "Filtreler"
+
+msgid "Perfume name"
+msgstr "Parfüm Adı"
+
+msgid "Ingredients / Notes (keyword)"
+msgstr "İçerik / Notalar (anahtar kelime)"
+
+msgid "Search"
+msgstr "Ara"
+
+msgid "Applied filters"
+msgstr "Uygulanan Filtreler"
+
+msgid "products found"
+msgstr "ürün bulundu"
+
+msgid "Sorted by"
+msgstr "Sıralı:"
+
+msgid "No results found"
+msgstr "Sonuç bulunamadı"
+
+msgid "Try changing filters or keywords."
+msgstr "Filtreleri veya anahtar kelimeleri değiştirmeyi deneyin."
+
+msgid "Match"
+msgstr "Eşleşme"
+
+msgid "Notes"
+msgstr "Notalar"
+
+msgid "View"
+msgstr "Görüntüle"
+
+msgid "Reset"
+msgstr "Sıfırla"
+
+msgid "Apply Filters"
+msgstr "Filtreleri Uygula"
+
+msgid "Browse and filter perfumes. Use the sidebar to narrow results."
+msgstr "Parfümlere göz atın ve filtreleyin. Sonuçları daraltmak için kenar çubuğu kullanın."
+
+msgid "Any"
+msgstr "Tümü"
+
+msgid "Best match"
+msgstr "En iyi eşleşme"
+
+msgid "Name A-Z"
+msgstr "Ada göre A-Z"
+
+msgid "Name Z-A"
+msgstr "Ada göre Z-A"
+
+msgid "No data in database"
+msgstr "Veritabanında veri yok"
+
+msgid "No data"
+msgstr "Veri yok"
+
+msgid "The database is empty. Please add perfumes first."
+msgstr "Veritabanı boş. Lütfen önce parfüm ekleyin."
