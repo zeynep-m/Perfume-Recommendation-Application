@@ -1,5 +1,6 @@
 from tkinter import ttk
 from tkinter import messagebox as msg
+import customtkinter as ctk
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
 from i18n import _
@@ -14,7 +15,7 @@ class AddNewPerfume(PerfumeFormWindow):
     def build_ui(self):
         super().build_ui()
         # Add Save button
-        self.btn_save = ttk.Button(self, text=_("Save Perfume"), command=self.save_perfume)
+        self.btn_save = ctk.CTkButton(self, text=_("Save Perfume"), command=self.save_perfume)
         self.btn_save.pack(side="bottom", pady=10, padx=10)
 
     def save_perfume(self):

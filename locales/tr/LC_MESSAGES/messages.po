@@ -633,6 +633,9 @@ msgstr "göz alıcı"
 msgid "Gourmand"
 msgstr "Gurme"
 
+msgid "Powdery"
+msgstr "Pudralı"
+
 msgid "grapefruit"
 msgstr "greyfurt"
 
@@ -1314,3 +1317,12 @@ msgstr "Veri yok"
 
 msgid "The database is empty. Please add perfumes first."
 msgstr "Veritabanı boş. Lütfen önce parfüm ekleyin."
+
+msgid "Show similar"
+msgstr "Benzerlerini göster"
+
+msgid "Show more"
+msgstr "Daha fazla göster"
+
+msgid "No matches found. Please select different preferences."
+msgstr "Eşleşme bulunamadı. Lütfen farklı tercihler seçin."

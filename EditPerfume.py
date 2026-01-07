@@ -1,5 +1,6 @@
 from tkinter import ttk
 from tkinter import messagebox as msg
+import customtkinter as ctk
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
 from i18n import _
@@ -31,7 +32,7 @@ class EditPerfume(PerfumeFormWindow):
     def build_ui(self):
         super().build_ui()
         # Add Update button
-        self.btn_update = ttk.Button(self, text=_("Update Perfume"), command=self.update_perfume)
+        self.btn_update = ctk.CTkButton(self, text=_("Update Perfume"), command=self.update_perfume)
         self.btn_update.pack(side="bottom", pady=10, padx=10)
 
     def update_perfume(self):

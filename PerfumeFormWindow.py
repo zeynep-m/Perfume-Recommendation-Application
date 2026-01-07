@@ -2,12 +2,17 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox as msg
 from tkinter import scrolledtext
+import customtkinter as ctk
 import sqlite3
 from perfume_db import PerfumeDatabase
 from i18n import _
 
+# Configure CustomTkinter theme
+ctk.set_appearance_mode("system")
+ctk.set_default_color_theme("green")
 
-class PerfumeFormWindow(tk.Toplevel):
+
+class PerfumeFormWindow(ctk.CTkToplevel):
     """Base form class for Add/Edit perfume windows"""
     
     def __init__(self, parent=None, title="Perfume Form"):
@@ -58,13 +63,13 @@ class PerfumeFormWindow(tk.Toplevel):
     def build_ui(self):
         """Build the form UI"""
         # Create a container frame for canvas and scrollbar
-        form_frame = ttk.Frame(self)
+        form_frame = ctk.CTkFrame(self)
         form_frame.pack(fill="both", expand=True)
 
         # Create main canvas with scrollbar for the form
-        canvas = tk.Canvas(form_frame, width=580)
+        canvas = tk.Canvas(form_frame, width=580, bg=self._get_bg_color())
         scrollbar = ttk.Scrollbar(form_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
+        scrollable_frame = ctk.CTkFrame(canvas, fg_color="transparent")
 
         scrollable_frame.bind(
             "<Configure>",
@@ -75,7 +80,7 @@ class PerfumeFormWindow(tk.Toplevel):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         # Create the LabelFrame container
-        self.main_frame = ttk.LabelFrame(scrollable_frame, text=_("Perfume Details"))
+        self.main_frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
         self.main_frame.pack(fill="both", expand=True, padx=20, pady=20)
 
         # Configure grid columns
@@ -89,67 +94,67 @@ class PerfumeFormWindow(tk.Toplevel):
         row = 0
 
         # Perfume Name
-        perfume_lbl = tk.Label(self.main_frame, text=_("Perfume Name *"))
+        perfume_lbl = ctk.CTkLabel(self.main_frame, text=_("Perfume Name *"))
         perfume_lbl.grid(column=0, row=row, **lbl_pad)
-        perfume_entry = ttk.Entry(self.main_frame, textvariable=self.perfume, width=40)
+        perfume_entry = ctk.CTkEntry(self.main_frame, textvariable=self.perfume, width=300)
         perfume_entry.grid(column=1, row=row, **ent_pad)
         self.required_fields['perfume'] = (perfume_entry, perfume_lbl)
         row += 1
 
         # Gender
-        gender_lbl = tk.Label(self.main_frame, text=_("Gender *"))
+        gender_lbl = ctk.CTkLabel(self.main_frame, text=_("Gender *"))
         gender_lbl.grid(column=0, row=row, **lbl_pad)
-        gender_combo = ttk.Combobox(self.main_frame, textvariable=self.gender, width=37, 
-                values=[_("Unisex"), _("Man"), _("Woman")])
+        gender_combo = ctk.CTkComboBox(self.main_frame, variable=self.gender, width=300,
+            values=[_("Unisex"), _("Man"), _("Woman")])
         gender_combo.grid(column=1, row=row, **ent_pad)
         self.required_fields['gender'] = (gender_combo, gender_lbl)
         row += 1
 
         # Intensity
-        intensity_lbl = tk.Label(self.main_frame, text=_("Intensity *"))
+        intensity_lbl = ctk.CTkLabel(self.main_frame, text=_("Intensity *"))
         intensity_lbl.grid(column=0, row=row, **lbl_pad)
-        intensity_combo = ttk.Combobox(self.main_frame, textvariable=self.intensity, width=37,
-                          values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Strong")])
+        intensity_combo = ctk.CTkComboBox(self.main_frame, variable=self.intensity, width=300,
+                  values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Strong")])
         intensity_combo.grid(column=1, row=row, **ent_pad)
         self.required_fields['intensity'] = (intensity_combo, intensity_lbl)
         row += 1
 
         # Ingredients/Notes (ScrolledText widget for multiline)
-        tk.Label(self.main_frame, text=_("Ingredients/Notes")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Ingredients/Notes")).grid(column=0, row=row, **lbl_pad)
         self.txt_ingredients = scrolledtext.ScrolledText(self.main_frame, height=4, width=40, wrap="word")
         self.txt_ingredients.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Season
-        tk.Label(self.main_frame, text=_("Season")).grid(column=0, row=row, **lbl_pad)
-        ttk.Entry(self.main_frame, textvariable=self.season, width=40).grid(column=1, row=row, **ent_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Season")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkEntry(self.main_frame, textvariable=self.season, width=300).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Concept (ScrolledText widget for multiline)
-        tk.Label(self.main_frame, text=_("Concept")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Concept")).grid(column=0, row=row, **lbl_pad)
         self.txt_concept = scrolledtext.ScrolledText(self.main_frame, height=3, width=40, wrap="word")
         self.txt_concept.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Longevity
-        tk.Label(self.main_frame, text=_("Longevity")).grid(column=0, row=row, **lbl_pad)
-        longevity_combo = ttk.Combobox(self.main_frame, textvariable=self.longevity, width=37,
-                           values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Long"), _("Long")])
+        ctk.CTkLabel(self.main_frame, text=_("Longevity")).grid(column=0, row=row, **lbl_pad)
+        longevity_combo = ctk.CTkComboBox(self.main_frame, variable=self.longevity, width=300,
+                   values=[_("Weak"), _("Moderate"), _("Strong"), _("Very Long"), _("Long")])
         longevity_combo.grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Collection
-        tk.Label(self.main_frame, text=_("Collection")).grid(column=0, row=row, **lbl_pad)
-        ttk.Entry(self.main_frame, textvariable=self.collection, width=40).grid(column=1, row=row, **ent_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Collection")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkEntry(self.main_frame, textvariable=self.collection, width=300).grid(column=1, row=row, **ent_pad)
         row += 1
 
         # Classification
-        tk.Label(self.main_frame, text=_("Classification")).grid(column=0, row=row, **lbl_pad)
-        ttk.Entry(self.main_frame, textvariable=self.classification, width=40).grid(column=1, row=row, **ent_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Classification")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkEntry(self.main_frame, textvariable=self.classification, width=300).grid(column=1, row=row, **ent_pad)
         row += 1
         # Subfamily
-        tk.Label(self.main_frame, text=_("Subfamily")).grid(column=0, row=row, **lbl_pad)
-        ttk.Entry(self.main_frame, textvariable=self.subfamily, width=40).grid(column=1, row=row, **ent_pad)
+        ctk.CTkLabel(self.main_frame, text=_("Subfamily")).grid(column=0, row=row, **lbl_pad)
+        ctk.CTkEntry(self.main_frame, textvariable=self.subfamily, width=300).grid(column=1, row=row, **ent_pad)
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
@@ -160,9 +165,9 @@ class PerfumeFormWindow(tk.Toplevel):
             return
         field, label = self.required_fields[field_key]
         if error:
-            label.config(fg="red")
+            label.configure(text_color="red")
         else:
-            label.config(fg="black")
+            label.configure(text_color="white")
 
     def validate_input(self):
         """Validate required fields with visual feedback"""
@@ -207,6 +212,12 @@ class PerfumeFormWindow(tk.Toplevel):
         """Set concept text in ScrolledText widget"""
         self.txt_concept.delete("1.0", "end")
         self.txt_concept.insert("1.0", text)
+
+    def _get_bg_color(self):
+        """Get background color based on current theme"""
+        if ctk.get_appearance_mode() == "Dark":
+            return "#212121"
+        return "#f0f0f0"
 
     def _center_on_parent(self, parent):
         try:

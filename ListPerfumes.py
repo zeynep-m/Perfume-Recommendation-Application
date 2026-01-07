@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox as msg
+from tkinter import font as tkfont
+import customtkinter as ctk
 import AddNewPerfume
 import EditPerfume
 from perfume_db import PerfumeDatabase
@@ -8,8 +10,12 @@ from i18n import _, toggle_lang, get_toggle_label
 from datetime import datetime
 import locale
 
+# Configure CustomTkinter theme
+ctk.set_appearance_mode("system")
+ctk.set_default_color_theme("green")
 
-class ListPerfumes(tk.Toplevel):
+
+class ListPerfumes(ctk.CTkToplevel):
     """Child window for displaying perfumes in a Treeview"""
 
     def __init__(self, parent, db=None):
@@ -24,42 +30,42 @@ class ListPerfumes(tk.Toplevel):
     def build_ui(self):
         """Build the user interface"""
         # Create a top toolbar frame with buttons and menus
-        toolbar_frame = ttk.Frame(self)
+        toolbar_frame = ctk.CTkFrame(self, fg_color="transparent")
         toolbar_frame.pack(fill="x", padx=10, pady=10)
 
         # Add button
-        self.add_btn = ttk.Button(toolbar_frame, text=_("Add (Ctrl+I)"), command=self.show_add_window)
+        self.add_btn = ctk.CTkButton(toolbar_frame, text=_("+"), command=self.show_add_window, width=80)
         self.add_btn.pack(side="left", padx=5)
         
         # Delete button
-        self.delete_btn = ttk.Button(toolbar_frame, text=_("Delete"), command=self.delete_perfume_action)
+        self.delete_btn = ctk.CTkButton(toolbar_frame, text=_("-"), command=self.delete_perfume_action, width=80)
         self.delete_btn.pack(side="left", padx=5)
         
         # Help button
-        self.help_btn = ttk.Button(toolbar_frame, text=_("❕"), command=self.show_help)
+        self.help_btn = ctk.CTkButton(toolbar_frame, text=_(""), command=self.show_help, width=60)
         self.help_btn.pack(side="left", padx=5)
         
         # Statistics button
-        self.stats_btn = ttk.Button(toolbar_frame, text=_("Statistics (F2)"), command=self.show_statistics)
+        self.stats_btn = ctk.CTkButton(toolbar_frame, text=_("Statistics"), command=self.show_statistics, width=120)
         self.stats_btn.pack(side="left", padx=5)
         
         # Language toggle button (right side)
-        self.lang_btn = ttk.Button(toolbar_frame, text=get_toggle_label(), command=self.on_toggle_lang)
+        self.lang_btn = ctk.CTkButton(toolbar_frame, text=get_toggle_label(), command=self.on_toggle_lang, width=100)
         self.lang_btn.pack(side="right", padx=5)
 
         # Create a search frame below the toolbar
-        search_frame = ttk.Frame(self)
+        search_frame = ctk.CTkFrame(self, fg_color="transparent")
         search_frame.pack(fill="x", padx=10, pady=(0, 10))
 
-        self.search_label = ttk.Label(search_frame, text=_("Search:"))
+        self.search_label = ctk.CTkLabel(search_frame, text=_("Search:"))
         self.search_label.pack(side="left", padx=5)
         
         self.search_var = tk.StringVar()
         self.search_var.trace("w", self.on_search_change)
-        search_entry = ttk.Entry(search_frame, textvariable=self.search_var, width=30)
+        search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, width=200)
         search_entry.pack(side="left", padx=5)
 
-        self.clear_btn = ttk.Button(search_frame, text=_("Clear"), command=self.clear_search)
+        self.clear_btn = ctk.CTkButton(search_frame, text=_("Clear"), command=self.clear_search, width=80)
         self.clear_btn.pack(side="left", padx=5)
 
         # Create a container frame for Treeview and Scrollbars
@@ -67,7 +73,43 @@ class ListPerfumes(tk.Toplevel):
         container.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         # Create a Treeview widget
-        self.tv = ttk.Treeview(container, height=20, show="headings")
+        # Bordered Treeview style reused from main popup
+        style = ttk.Style(self)
+        style.configure(
+            "Grid.Treeview",
+            bordercolor="#c5c5c5",
+            borderwidth=1,
+            relief="solid",
+        )
+        style.configure(
+            "Grid.Treeview.Heading",
+            bordercolor="#c5c5c5",
+            borderwidth=1,
+            relief="solid",
+        )
+        style.layout(
+            "Grid.Treeview",
+            [
+                (
+                    "Treeview.border",
+                    {
+                        "sticky": "nswe",
+                        "children": [
+                            (
+                                "Treeview.padding",
+                                {
+                                    "sticky": "nswe",
+                                    "children": [("Treeview.treearea", {"sticky": "nswe"})],
+                                },
+                            )
+                        ],
+                    },
+                )
+            ],
+        )
+        style.layout("Grid.Treeview.Heading", style.layout("Treeview.Heading"))
+
+        self.tv = ttk.Treeview(container, height=20, show="headings", style="Grid.Treeview")
         self.tv["columns"] = ("id", "perfume", "gender", "intensity", "ingredients", "collection", "season", "concept", "classification", "longevity")
         self.tv["selectmode"] = "browse"
 
@@ -95,7 +137,7 @@ class ListPerfumes(tk.Toplevel):
         self.tv.column("perfume", anchor="w", width=200, stretch=False)
         self.tv.column("gender", anchor="center", width=80, stretch=False)
         self.tv.column("intensity", anchor="center", width=90, stretch=False)
-        self.tv.column("ingredients", anchor="w", width=250, stretch=False)
+        self.tv.column("ingredients", anchor="w", width=320, minwidth=260, stretch=True)
         self.tv.column("collection", anchor="w", width=150, stretch=False)
         self.tv.column("season", anchor="center", width=150, stretch=False)
         self.tv.column("concept", anchor="w", width=200, stretch=False)
@@ -112,7 +154,7 @@ class ListPerfumes(tk.Toplevel):
         container.grid_columnconfigure(0, weight=1)
 
         # Create an info label at the bottom (just count)
-        self.info_label = tk.Label(self, text="", fg="gray")
+        self.info_label = ctk.CTkLabel(self, text="", text_color="gray")
         self.info_label.pack(side="bottom", pady=5)
 
         # Bind events
@@ -184,7 +226,25 @@ class ListPerfumes(tk.Toplevel):
         # Update info label (just count)
         total = self.db.get_total_count()
         displayed = len(perfumes)
-        self.info_label.config(text=_("Displaying {} of {} perfumes").format(displayed, total))
+        self.info_label.configure(text=_("Displaying {} of {} perfumes").format(displayed, total))
+        self._autosize_columns()
+
+    def _autosize_columns(self, min_w=60, max_w=900, pad=24):
+        """Resize columns to fit content (headings + visible rows)."""
+        # ttk.Treeview doesn't expose a direct 'font' option; get from style or fallback
+        try:
+            style = ttk.Style(self)
+            font_name = style.lookup("Treeview", "font") or style.lookup("Grid.Treeview", "font")
+            font = tkfont.nametofont(font_name) if font_name else tkfont.nametofont("TkDefaultFont")
+        except Exception:
+            font = tkfont.nametofont("TkDefaultFont")
+        for col in self.tv["columns"]:
+            max_px = font.measure(self.tv.heading(col)["text"]) + pad
+            for item in self.tv.get_children(""):
+                text = str(self.tv.set(item, col))
+                max_px = max(max_px, font.measure(text) + pad)
+            max_px = max(min_w, min(max_px, max_w))
+            self.tv.column(col, width=max_px)
 
     def on_search_change(self, *args):
         """Called when search text changes"""
@@ -303,17 +363,17 @@ class ListPerfumes(tk.Toplevel):
                   "subfamily"]
 
         # Create a new window
-        details_window = tk.Toplevel(self)
+        details_window = ctk.CTkToplevel(self)
         details_window.title(_("Perfume Details"))
         details_window.geometry("600x500")
 
         # Create a frame with scrollbar for details
-        container = ttk.Frame(details_window)
+        container = ctk.CTkFrame(details_window, fg_color="transparent")
         container.pack(fill="both", expand=True, padx=10, pady=10)
 
-        canvas = tk.Canvas(container, bg="white")
+        canvas = tk.Canvas(container, bg="#f0f0f0" if ctk.get_appearance_mode() == "Light" else "#212121")
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
+        scrollable_frame = ctk.CTkFrame(canvas, fg_color="transparent")
 
         scrollable_frame.bind(
             "<Configure>",
@@ -344,15 +404,15 @@ class ListPerfumes(tk.Toplevel):
             if col_name == "sources":
                 continue
                 
-            frame = ttk.Frame(scrollable_frame)
+            frame = ctk.CTkFrame(scrollable_frame, fg_color="transparent")
             frame.pack(fill="x", padx=5, pady=5)
 
             disp = display_map.get(col_name, col_name.replace('_', ' ').title())
-            label = ttk.Label(frame, text=f"{disp}:", 
-                            font=("Arial", 10, "bold"), width=20)
+            label = ctk.CTkLabel(frame, text=f"{disp}:", 
+                            font=("Arial", 10, "bold"))
             label.pack(side="left")
 
-            value_label = ttk.Label(frame, text=str(value), wraplength=350, justify="left")
+            value_label = ctk.CTkLabel(frame, text=str(value), wraplength=350, justify="left")
             value_label.pack(side="left", padx=10)
 
         canvas.pack(side="left", fill="both", expand=True)
@@ -428,13 +488,13 @@ Features:
         self.tv.heading("classification", text=_("Classification"))
         self.tv.heading("longevity", text=_("Longevity"))
         # Update toolbar and search labels
-        self.add_btn.config(text=_("Add (Ctrl+I)"))
-        self.delete_btn.config(text=_("Delete"))
-        self.help_btn.config(text=_("❕"))
-        self.stats_btn.config(text=_("Statistics (F2)"))
-        self.search_label.config(text=_("Search:"))
-        self.clear_btn.config(text=_("Clear"))
+        self.add_btn.configure(text=_("Add (Ctrl+I)"))
+        self.delete_btn.configure(text=_("Delete"))
+        self.help_btn.configure(text=_("❕"))
+        self.stats_btn.configure(text=_("Statistics (F2)"))
+        self.search_label.configure(text=_("Search:"))
+        self.clear_btn.configure(text=_("Clear"))
         # Update language button label
-        self.lang_btn.config(text=get_toggle_label())
+        self.lang_btn.configure(text=get_toggle_label())
         # Reload the perfume list to apply translations to cell values and count label
         self.list_perfumes()

@@ -1,10 +1,16 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import font as tkfont
+import customtkinter as ctk
 
 from ListPerfumes import ListPerfumes
 from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label, translate_list
+
+# Set CustomTkinter appearance
+ctk.set_appearance_mode("system")  # Modes: system, light, dark
+ctk.set_default_color_theme("green")  # Themes: blue, dark-blue, green
 
 
 # ----------------------------
@@ -21,108 +27,215 @@ def _split_notes(notes_text):
     return [n.strip() for n in str(notes_text).split(",") if n.strip()]
 
 
-def match_score(prod, profile, name_query, notes_query):
+def parse_selected_notes(notes_input):
+    """Parse comma-separated notes input into list of individual notes"""
+    if not notes_input or not notes_input.strip():
+        return []
+    return [n.strip() for n in notes_input.split(",") if n.strip()]
+
+
+def matches_notes(perfume_notes, selected_notes, strict=True):
+    """Check if perfume notes match selected notes.
+    strict=True: ALL selected notes must be in perfume notes
+    strict=False: AT LEAST ONE selected note must be in perfume notes
+    """
+    if not selected_notes:
+        return True
+    
+    perfume_notes_lower = [n.lower() for n in perfume_notes]
+    
+    if strict:
+        # All selected notes must be present
+        for note in selected_notes:
+            if not any(note.lower() in pn for pn in perfume_notes_lower):
+                return False
+        return True
+    else:
+        # At least one selected note must be present
+        for note in selected_notes:
+            if any(note.lower() in pn for pn in perfume_notes_lower):
+                return True
+        return False
+
+
+def match_score(prod, profile, notes_selected, strict_notes=True):
+    """Calculate match score using Java-style logic.
+    Returns: (tier, score, total) or None if filtered out
+    tier 1 = exact match (all filters match)
+    tier 2 = close match (2+ out of 3 non-Any filters match)
+    tier 3 = loose match with notes
+    tier 4 = very loose
+    """
     score = 0
     total = 0
+    filters_checked = []
 
-    # Gender match (with Unisex tolerance)
+    # Check each basic filter
     if profile["gender"] != "Any":
+        filters_checked.append("gender")
         total += 1
         if profile["gender"] == "Unisex" or prod["gender"] == "Unisex" or prod["gender"] == profile["gender"]:
             score += 1
 
-    # Intensity
     if profile["intensity"] != "Any":
+        filters_checked.append("intensity")
         total += 1
         if prod["intensity"] == profile["intensity"]:
             score += 1
 
-    # Season
     if profile["season"] != "Any":
+        filters_checked.append("season")
         total += 1
         if prod["season"] == profile["season"]:
             score += 1
 
-    # Concept / Occasion
     if profile["concept"] != "Any":
+        filters_checked.append("concept")
         total += 1
         if prod["concept"] == profile["concept"]:
             score += 1
 
-    # Classification (family)
-    if profile["classification"] != "Any":
-        total += 1
-        if prod["classification"] == profile["classification"]:
-            score += 1
-
-    # Longevity
     if profile["longevity"] != "Any":
+        filters_checked.append("longevity")
         total += 1
         if prod["longevity"] == profile["longevity"]:
             score += 1
 
-    # Name query filter
-    nq = (name_query or "").strip().lower()
-    if nq:
-        if nq not in prod["name"].lower() and nq not in prod["desc"].lower():
-            return None
+    # Check notes matching
+    notes_match = matches_notes(prod["notes"], notes_selected, strict=strict_notes)
+    if not notes_match:
+        return None
 
-    # Notes query filter
-    lq = (notes_query or "").strip().lower()
-    if lq:
-        if not any(lq in n.lower() for n in prod["notes"]):
-            return None
+    # Determine tier based on score
+    total = total or 1
+    match_pct = int((score / total) * 100)
+    
+    if match_pct == 100:
+        tier = 1  # Exact match
+    elif score >= 2 or match_pct >= 67:
+        tier = 2  # Close match (at least 2 out of 3)
+    else:
+        tier = 3  # Loose match
+    
+    return tier, score, total, match_pct
 
-    total = total or 1  # avoid zero division when everything is "Any"
-    return score, total
 
-
-def filter_rank_products(profile, name_query, notes_query, sort_mode, products):
+def filter_rank_products(profile, notes_input, sort_mode, products, strict_notes=True):
+    """Filter and rank products using Java-style matching logic."""
+    notes_selected = parse_selected_notes(notes_input)
     scored = []
+    
     for p in products:
-        ms = match_score(p, profile, name_query, notes_query)
+        ms = match_score(p, profile, notes_selected, strict_notes=strict_notes)
         if ms is None:
             continue
-        score, total = ms
-        match_pct = int((score / total) * 100)
-        scored.append({**p, "match": match_pct, "_score": score})
+        tier, score, total, match_pct = ms
+        scored.append({**p, "match": match_pct, "_score": score, "_tier": tier})
 
-    if sort_mode == "Best match":
-        scored.sort(key=lambda x: x["_score"], reverse=True)
-    elif sort_mode == "Name A-Z":
+    # Sort by tier first, then by score
+    if sort_mode == _("Best match"):
+        scored.sort(key=lambda x: (x["_tier"], -x["_score"]))
+    elif sort_mode == _("Name A-Z"):
         scored.sort(key=lambda x: x["name"])
-    elif sort_mode == "Name Z-A":
+    elif sort_mode == _("Name Z-A"):
         scored.sort(key=lambda x: x["name"], reverse=True)
 
     return scored
 
 
-class ScrollableFrame(ttk.Frame):
+class ScrollableFrame(ctk.CTkScrollableFrame):
     def __init__(self, container):
-        super().__init__(container)
-        self.canvas = tk.Canvas(self, highlightthickness=0)
-        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
-        self.inner = ttk.Frame(self.canvas)
+        super().__init__(container, fg_color="transparent")
+        self.inner = self  # For compatibility with existing code
 
-        self.inner.bind(
-            "<Configure>",
-            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        )
 
-        self.canvas.create_window((0, 0), window=self.inner, anchor="nw")
-        self.canvas.configure(yscrollcommand=self.scrollbar.set)
-
-        self.canvas.pack(side="left", fill="both", expand=True)
-        self.scrollbar.pack(side="right", fill="y")
+class MultiSelectCheckbox(ctk.CTkFrame):
+    """Multi-select widget using checkboxes, similar to radiobuttons in layout"""
+    def __init__(self, parent, options=None):
+        super().__init__(parent, fg_color="transparent")
+        self.var_dict = {}  # {option: BooleanVar}
+        self.options = options or []
+        self.build_ui()
+    
+    def build_ui(self):
+        """Build checkbox layout"""
+        for option in self.options:
+            var = tk.BooleanVar(value=False)
+            self.var_dict[option] = var
+            cb = ctk.CTkCheckBox(self, text=option, variable=var)
+            cb.pack(anchor="w", pady=2)
+    
+    def set_options(self, options):
+        """Update available options and rebuild checkboxes"""
+        # Clear existing checkboxes
+        for widget in self.winfo_children():
+            widget.destroy()
+        
+        # Store current selections
+        current_selections = self.get_selected()
+        
+        self.var_dict.clear()
+        self.options = options
+        self.build_ui()
+        
+        # Restore previous selections if they still exist in new options
+        for selection in current_selections:
+            if selection in self.var_dict:
+                self.var_dict[selection].set(True)
+    
+    def get_selected(self):
+        """Return list of selected options"""
+        return [opt for opt, var in self.var_dict.items() if var.get()]
+    
+    def clear_selection(self):
+        """Deselect all options"""
+        for var in self.var_dict.values():
+            var.set(False)
 
 # ----------------------------
 # Main Window (Filters)
 # ----------------------------
-root = tk.Tk()
+root = ctk.CTk()
 root.title(_("Perfume Recommender"))
 root.geometry("560x760")
 
 db = PerfumeDatabase()
+
+# Shared Treeview style with borders on all rows/headers
+tv_style = ttk.Style()
+tv_style.configure(
+    "Grid.Treeview",
+    bordercolor="#c5c5c5",
+    borderwidth=1,
+    relief="solid",
+)
+tv_style.configure(
+    "Grid.Treeview.Heading",
+    bordercolor="#c5c5c5",
+    borderwidth=1,
+    relief="solid",
+)
+tv_style.layout(
+    "Grid.Treeview",
+    [
+        (
+            "Treeview.border",
+            {
+                "sticky": "nswe",
+                "children": [
+                    (
+                        "Treeview.padding",
+                        {
+                            "sticky": "nswe",
+                            "children": [("Treeview.treearea", {"sticky": "nswe"})],
+                        },
+                    )
+                ],
+            },
+        )
+    ],
+)
+tv_style.layout("Grid.Treeview.Heading", tv_style.layout("Treeview.Heading"))
 
 
 def load_products_from_db():
@@ -158,6 +271,7 @@ def load_products_from_db():
 
         products.append(
             {
+                "id": _pid,
                 "name": _safe_value(perfume, "Unnamed"),
                 "gender": _safe_value(gender, "Unisex"),
                 "intensity": _safe_value(intensity, "Moderate"),
@@ -166,6 +280,7 @@ def load_products_from_db():
                 "concept": _safe_value(concept, "Daily"),
                 "classification": _safe_value(classification, "Fresh"),
                 "longevity": _safe_value(longevity, "Moderate"),
+                "collection": _safe_value(collection, ""),
                 "desc": _safe_value(desc_text, ""),
             }
         )
@@ -174,26 +289,26 @@ def load_products_from_db():
 
 # Create menu bar
 menubar = tk.Menu(root)
-root.config(menu=menubar)
+root.configure(menu=menubar)
 
 TITLE_FONT = ("Arial", 18, "bold")
 H2_FONT = ("Arial", 13, "bold")
 TEXT_FONT = ("Arial", 11)
 
-top_bar = tk.Frame(root)
+top_bar = ctk.CTkFrame(root, fg_color="transparent")
 top_bar.pack(fill="x")
 
-title_label = tk.Label(top_bar, text=_("Perfume Recommender"), font=("Arial", 20, "bold"))
+title_label = ctk.CTkLabel(top_bar, text=_("Perfume Recommender"), font=("Arial", 20, "bold"))
 title_label.pack(side="left", padx=(12, 6), pady=(12, 6))
 
-lang_btn = ttk.Button(top_bar, text=get_toggle_label())
+lang_btn = ctk.CTkButton(top_bar, text=get_toggle_label(), width=100)
 lang_btn.pack(side="right", padx=12, pady=12)
 
-subtitle = tk.Label(
+subtitle = ctk.CTkLabel(
     root,
-    text=_("Select your preferences to generate a personalized Dior profile.\nRecommendations are currently shown as a demo (mock) list."),
+    text=_("Browse and filter perfumes. Use the sidebar to narrow results."),
     font=TEXT_FONT,
-    fg="gray"
+    text_color="gray"
 )
 subtitle.pack(pady=(0, 18))
 # ----------------------------
@@ -218,117 +333,96 @@ def value_index(values, target, fallback=0):
         return fallback
 
 
-main_container = ttk.Frame(root)
+main_container = ctk.CTkFrame(root, fg_color="transparent")
 main_container.pack(fill="both", expand=True)
 main_container.columnconfigure(0, weight=0)
 main_container.columnconfigure(1, weight=1)
 main_container.rowconfigure(0, weight=1)
 
-sidebar = ttk.Frame(main_container, padding=16)
-sidebar.grid(row=0, column=0, sticky="nsw")
+sidebar = ctk.CTkFrame(main_container, width=240, corner_radius=10)
+sidebar.grid(row=0, column=0, sticky="nsw", padx=(10, 5), pady=10)
 sidebar.columnconfigure(0, weight=1)
+sidebar.grid_propagate(False)
 
-filters_title = ttk.Label(sidebar, text=_("Filters"), font=("Arial", 16, "bold"))
-filters_title.grid(row=0, column=0, sticky="w", pady=(0, 10))
-
-perfume_name_label = ttk.Label(sidebar, text=_("Perfume name"))
-perfume_name_label.grid(row=1, column=0, sticky="w", pady=(8, 2))
-name_var = tk.StringVar()
-name_entry = ttk.Entry(sidebar, textvariable=name_var)
-name_entry.grid(row=2, column=0, sticky="ew")
+filters_title = ctk.CTkLabel(sidebar, text=_("Filters"), font=("Arial", 16, "bold"))
+filters_title.grid(row=0, column=0, sticky="w", pady=(0, 10), padx=10)
 
 
 def add_filter(r, label, values, default_idx):
-    lbl = ttk.Label(sidebar, text=_(label))
-    lbl.grid(row=r, column=0, sticky="w", pady=(10, 2))
+    lbl = ctk.CTkLabel(sidebar, text=_(label), anchor="w")
+    lbl.grid(row=r, column=0, sticky="w", pady=(10, 2), padx=10)
     var = tk.StringVar()
     translated = translate_list(values)
-    cb = ttk.Combobox(sidebar, textvariable=var, state="readonly", values=translated, width=22)
-    cb.current(default_idx)
-    try:
-        var.set(translated[default_idx])
-    except Exception:
-        pass
-    cb.grid(row=r + 1, column=0, sticky="ew")
+    cb = ctk.CTkComboBox(sidebar, variable=var, state="readonly", values=translated, width=200)
+    cb.set(translated[default_idx])
+    cb.grid(row=r + 1, column=0, sticky="ew", padx=10)
     return {"label": lbl, "combo": cb, "values": values, "default": default_idx}
 
 
-gender_filter = add_filter(3, "Gender", gender_values, 0)
-intensity_filter = add_filter(5, "Intensity", intensity_values, 0)
+gender_filter = add_filter(1, "Gender", gender_values, 0)
+intensity_filter = add_filter(3, "Intensity", intensity_values, 0)
+season_filter = add_filter(5, "Season", season_values, 0)
+concept_filter = add_filter(7, "Concept", concept_values, 0)
+longevity_filter = add_filter(9, "Longevity", longevity_values, 0)
 
-notes_var = tk.StringVar()
-notes_entry = ttk.Entry(sidebar, textvariable=notes_var)
-notes_entry.grid(row=8, column=0, sticky="ew")
-notes_label = ttk.Label(sidebar, text=_("Ingredients / Notes (keyword)"))
-notes_label.grid(row=7, column=0, sticky="w", pady=(10, 2))
+# Create frame for notes checkboxes with scrollbar
+notes_frame = ctk.CTkScrollableFrame(sidebar, height=120, fg_color="transparent")
+notes_frame.grid(row=11, column=0, sticky="ew", pady=(10, 10), padx=10)
+notes_frame.columnconfigure(0, weight=1)
 
-season_filter = add_filter(9, "Season", season_values, 0)
-concept_filter = add_filter(11, "Concept", concept_values, 0)
-classification_filter = add_filter(13, "Classification", classification_values, 0)
-longevity_filter = add_filter(15, "Longevity", longevity_values, 0)
+notes_inner = notes_frame  # For compatibility
 
-content = ttk.Frame(main_container, padding=(16, 16, 8, 16))
-content.grid(row=0, column=1, sticky="nsew")
+# Notes multi-select widget will be populated after functions are defined
+notes_widget = MultiSelectCheckbox(notes_inner, options=[])
+notes_widget.pack(fill="both", expand=True)
+
+content = ctk.CTkFrame(main_container, corner_radius=10)
+content.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
 content.columnconfigure(0, weight=1)
 content.rowconfigure(4, weight=1)
 
-header = ttk.Frame(content)
-header.grid(row=0, column=0, sticky="ew")
+header = ctk.CTkFrame(content, fg_color="transparent")
+header.grid(row=0, column=0, sticky="ew", padx=16, pady=(16, 0))
 header.columnconfigure(0, weight=1)
 header.columnconfigure(1, weight=0)
-header_title = ttk.Label(header, text=_("Perfume Recommender"), font=("Arial", 18, "bold"))
+header_title = ctk.CTkLabel(header, text=_("Perfume Recommender"), font=("Arial", 18, "bold"))
 header_title.grid(row=0, column=0, sticky="w")
-db_header_btn = ttk.Button(header, text=_("Open Perfume DB"))
+db_header_btn = ctk.CTkButton(header, text=_("Open Perfume DB"), width=140)
 db_header_btn.grid(row=0, column=1, sticky="e", padx=(10, 0))
 
-controls = ttk.Frame(content)
-controls.grid(row=1, column=0, sticky="ew", pady=(10, 6))
+controls = ctk.CTkFrame(content, fg_color="transparent")
+controls.grid(row=1, column=0, sticky="ew", pady=(10, 6), padx=16)
 controls.columnconfigure(0, weight=1)
 
 global_search_var = tk.StringVar()
 placeholder = _("Search")
-global_search_entry = ttk.Entry(controls, textvariable=global_search_var)
+global_search_entry = ctk.CTkEntry(controls, textvariable=global_search_var, placeholder_text=placeholder)
 global_search_entry.grid(row=0, column=0, sticky="ew", padx=(0, 10))
 
-def _on_search_focus_in(event):
-    if global_search_var.get() == placeholder:
-        global_search_entry.delete(0, tk.END)
-
-
-def _on_search_focus_out(event):
-    if not global_search_var.get().strip():
-        global_search_entry.delete(0, tk.END)
-        global_search_entry.insert(0, placeholder)
-
-
-global_search_entry.insert(0, placeholder)
-global_search_entry.bind("<FocusIn>", _on_search_focus_in)
-global_search_entry.bind("<FocusOut>", _on_search_focus_out)
-
-sort_var = tk.StringVar(value="Best match")
-sort_cb = ttk.Combobox(
+sort_var = tk.StringVar(value=_("Best match"))
+sort_cb = ctk.CTkComboBox(
     controls,
-    textvariable=sort_var,
+    variable=sort_var,
     state="readonly",
-    width=14,
-    values=("Best match", "Name A-Z", "Name Z-A"),
+    width=140,
+    values=(_("Best match"), _("Name A-Z"), _("Name Z-A")),
 )
 sort_cb.grid(row=0, column=1, sticky="e")
 
-progress = ttk.Progressbar(controls, mode="indeterminate")
+progress = ctk.CTkProgressBar(controls, mode="indeterminate")
 progress.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
 progress.grid_remove()
 
-chips_row = ttk.Frame(content)
-chips_row.grid(row=2, column=0, sticky="w", pady=(0, 10))
-chips_label = ttk.Label(chips_row, text="", foreground="gray")
+chips_row = ctk.CTkFrame(content, fg_color="transparent")
+chips_row.grid(row=2, column=0, sticky="w", pady=(0, 10), padx=16)
+chips_label = ctk.CTkLabel(chips_row, text="", text_color="gray")
 chips_label.pack(anchor="w")
 
 cards_area = ScrollableFrame(content)
-cards_area.grid(row=4, column=0, sticky="nsew")
+cards_area.grid(row=4, column=0, sticky="nsew", padx=16)
 
-info_lbl = ttk.Label(content, text="", foreground="gray")
-info_lbl.grid(row=5, column=0, sticky="w", pady=(10, 0))
+info_lbl = ctk.CTkLabel(content, text="", text_color="gray")
+info_lbl.grid(row=5, column=0, sticky="w", pady=(10, 0), padx=16)
 
 
 def clear_cards():
@@ -337,10 +431,14 @@ def clear_cards():
 
 
 def get_filter_value(filter_obj):
-    idx = filter_obj["combo"].current()
-    if idx < 0 or idx >= len(filter_obj["values"]):
-        idx = filter_obj["default"]
-    return filter_obj["values"][idx]
+    val = filter_obj["combo"].get()
+    # Translate back to English
+    translated = translate_list(filter_obj["values"])
+    try:
+        idx = translated.index(val)
+        return filter_obj["values"][idx]
+    except (ValueError, IndexError):
+        return filter_obj["values"][filter_obj["default"]]
 
 
 def build_profile():
@@ -349,78 +447,216 @@ def build_profile():
         "intensity": get_filter_value(intensity_filter),
         "season": get_filter_value(season_filter),
         "concept": get_filter_value(concept_filter),
-        "classification": get_filter_value(classification_filter),
         "longevity": get_filter_value(longevity_filter),
     }
 
 
+def has_active_filters(profile, notes_query):
+    """Check if any filter is active (not 'Any') or notes keyword is entered"""
+    if notes_query and notes_query.strip():
+        return True
+    for key, value in profile.items():
+        if value != "Any":
+            return True
+    return False
+
+
+def get_unique_notes_from_products(products):
+    """Extract all unique notes from a list of products"""
+    unique_notes = set()
+    for p in products:
+        for note in p.get("notes", []):
+            if note:
+                unique_notes.add(note)
+    return sorted(list(unique_notes))
+
+
+def group_by_match_percentage(items):
+    """Group items by match percentage, return sorted list of (percentage, items) tuples"""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for item in items:
+        match_pct = item.get("match", 0)
+        if match_pct > 0:  # Exclude 0% matches
+            groups[match_pct].append(item)
+    # Sort by percentage descending
+    return sorted(groups.items(), key=lambda x: x[0], reverse=True)
+
+
 def show_product_popup(product):
-    win = tk.Toplevel(root)
+    win = ctk.CTkToplevel(root)
+    win.withdraw()
     win.title(product["name"])
-    win.geometry("560x360")
+    win.geometry("900x340")
+    win.resizable(False, False)  # Prevent window expansion
+    try:
+        win.transient(root)
+    except Exception:
+        pass
 
-    ttk.Label(win, text=product["name"], font=("Arial", 16, "bold")).pack(anchor="w", padx=16, pady=(16, 6))
-    ttk.Label(win, text=f"{_('Match')}: {product['match']}%", foreground="gray").pack(anchor="w", padx=16)
+    ctk.CTkLabel(win, text=product["name"], font=("Arial", 16, "bold")).pack(anchor="w", padx=16, pady=(12, 4))
+    ctk.CTkLabel(win, text=f"{_('Match')}: {product['match']}%", text_color="gray").pack(anchor="w", padx=16)
 
-    ttk.Label(win, text=product["desc"], wraplength=520, justify="left").pack(anchor="w", padx=16, pady=(10, 10))
+    # Pull full DB row so we can mirror the Perfume DB table layout
+    detail_row = None
+    try:
+        if "id" in product:
+            detail_row = db.get_perfume_details(product["id"])
+    except Exception:
+        detail_row = None
 
-    notes_text = ", ".join(product["notes"])
-    meta = (
-        f"{_('Gender')}: {_(product['gender'])}\n"
-        f"{_('Intensity')}: {_(product['intensity'])}\n"
-        f"{_('Season')}: {_(product['season'])}\n"
-        f"{_('Concept')}: {_(product['concept'])}\n"
-        f"{_('Classification')}: {_(product['classification'])}\n"
-        f"{_('Longevity')}: {_(product['longevity'])}\n"
-        f"{_('Notes')}: {notes_text}\n"
-    )
-    ttk.Label(win, text=meta, justify="left").pack(anchor="w", padx=16)
+    # Pivot table: rows become field/value pairs for easier reading
+    columns = ("field", "value")
+    table_frame = ctk.CTkFrame(win)
+    table_frame.pack(fill="both", expand=True, padx=12, pady=(8, 6))
 
-    ttk.Button(win, text=_("Close"), command=win.destroy).pack(pady=12)
+    tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=14, style="Grid.Treeview")
+    vsb = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+    hsb = ttk.Scrollbar(table_frame, orient="horizontal", command=tree.xview)
+    tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+    tree.heading("field", text=_("Field"), anchor="w")
+    tree.heading("value", text=_("Value"), anchor="w")
+    tree.column("field", width=150, anchor="w", stretch=False)
+    tree.column("value", width=680, anchor="w", stretch=True)
+
+    display_map = {
+        "id": _("ID"),
+        "perfume": _("Perfume Name"),
+        "gender": _("Gender"),
+        "intensity": _("Intensity"),
+        "ingredients": _("Ingredients/Notes"),
+        "collection": _("Collection"),
+        "season": _("Season"),
+        "concept": _("Concept"),
+        "classification": _("Classification"),
+        "longevity": _("Longevity"),
+        "subfamily": _("Subfamily"),
+    }
+
+    def translate_compound_value(text):
+        """Translate compound text by translating individual words"""
+        if not text:
+            return text
+        import re
+        words = re.split(r'(\s+|/|-|,|\(|\))', str(text))
+        translated_words = []
+        for word in words:
+            if word.strip() and word not in (' ', '/', '-', ',', '(', ')'):
+                translated_words.append(_(word))
+            else:
+                translated_words.append(word)
+        return ''.join(translated_words)
+
+    def build_rows():
+        def _str(val):
+            return "" if val is None else str(val)
+        
+        def _translate_val(val):
+            """Translate categorical values"""
+            if val is None or val == "":
+                return ""
+            return _(str(val))
+
+        if detail_row:
+            # detail_row layout: (id, perfume, gender, intensity, ingredients_notes, season, concept, longevity, collection, classification, subfamily)
+            return [
+                (display_map["id"], _str(detail_row[0])),
+                (display_map["perfume"], _str(detail_row[1])),
+                (display_map["gender"], _translate_val(detail_row[2])),
+                (display_map["intensity"], _translate_val(detail_row[3])),
+                (display_map["ingredients"], translate_compound_value(detail_row[4])),
+                (display_map["collection"], _str(detail_row[8])),
+                (display_map["season"], translate_compound_value(detail_row[5])),
+                (display_map["concept"], translate_compound_value(detail_row[6])),
+                (display_map["classification"], translate_compound_value(detail_row[9])),
+                (display_map["longevity"], _translate_val(detail_row[7])),
+                (display_map["subfamily"], _str(detail_row[10]) if len(detail_row) > 10 else ""),
+            ]
+
+        # Fallback to in-memory card data
+        return [
+            (display_map["id"], _str(product.get("id", "-"))),
+            (display_map["perfume"], _str(product.get("name", ""))),
+            (display_map["gender"], _translate_val(product.get("gender", ""))),
+            (display_map["intensity"], _translate_val(product.get("intensity", ""))),
+            (display_map["ingredients"], translate_compound_value(", ".join(product.get("notes", [])))),
+            (display_map["collection"], _str(product.get("collection", ""))),
+            (display_map["season"], translate_compound_value(product.get("season", ""))),
+            (display_map["concept"], translate_compound_value(product.get("concept", ""))),
+            (display_map["classification"], translate_compound_value(product.get("classification", ""))),
+            (display_map["longevity"], _translate_val(product.get("longevity", ""))),
+        ]
+
+    for row in build_rows():
+        tree.insert("", "end", values=row)
+
+    # Auto-size value column to fit content/heading, capped to window width
+    try:
+        font = tkfont.nametofont(tree.cget("font"))
+        pad = 24
+        max_w = 1000
+        max_px = font.measure(tree.heading("value")["text"]) + pad
+        for item in tree.get_children(""):
+            text = str(tree.set(item, "value"))
+            max_px = max(max_px, font.measure(text) + pad)
+        max_px = min(max_px, max_w)
+        tree.column("value", width=max_px)
+    except Exception:
+        pass
+
+    tree.grid(row=0, column=0, sticky="nsew")
+    vsb.grid(row=0, column=1, sticky="ns")
+    hsb.grid(row=1, column=0, sticky="ew")
+    table_frame.grid_rowconfigure(0, weight=1)
+    table_frame.grid_columnconfigure(0, weight=1)
+
+    ctk.CTkButton(win, text=_("Close"), command=win.destroy).pack(pady=(6, 10))
+    
+    win.deiconify()  # Show window after everything is built
 
 
-def _render_cards_real():
-    progress.stop()
+def _render_cards_real(tiers_to_show=1, strict_notes=True):
+    progress.set(1)  # Set to complete
     progress.grid_remove()
 
     clear_cards()
     profile = build_profile()
 
-    chips_label.config(
-        text=(
-            f"{_('Applied filters')}: {profile['gender']} • {profile['intensity']} • {profile['season']} • "
-            f"{profile['concept']} • {profile['classification']} • {profile['longevity']}"
-        )
-    )
+    # Get selected notes from checkbox widget
+    selected_notes = notes_widget.get_selected()
+    fnotes = ", ".join(selected_notes) if selected_notes else ""
+    
+    # Check if user has active filters
+    filters_active = has_active_filters(profile, fnotes)
 
-    fname = name_var.get()
-    fnotes = notes_var.get()
-
-    gq = global_search_var.get().strip().lower()
+    gq_raw = global_search_var.get().strip()
+    gq = gq_raw.lower()
     if gq == placeholder.lower():
         gq = ""
+        gq_raw = ""
+
+    chips_label.configure(text="")
 
     products = load_products_from_db()
     if not products:
-        info_lbl.config(text=_("No data in database"))
-        empty = ttk.Frame(cards_area.inner, padding=18, relief="solid")
+        info_lbl.configure(text=_("No data in database"))
+        empty = ctk.CTkFrame(cards_area.inner, corner_radius=10)
         empty.grid(row=0, column=0, sticky="ew", padx=8, pady=8)
-        ttk.Label(empty, text=_("No results found"), font=("Arial", 13, "bold")).pack(anchor="w")
-        ttk.Label(empty, text=_("Try changing filters or keywords."), foreground="gray").pack(anchor="w", pady=(6, 0))
+        ctk.CTkLabel(empty, text=_("No data in database"), font=("Arial", 13, "bold")).pack(anchor="w", padx=18, pady=18)
         return
 
-    items = filter_rank_products(profile, fname, fnotes, sort_var.get(), products)
+    items = filter_rank_products(profile, fnotes, sort_var.get(), products, strict_notes=strict_notes)
 
     if gq:
         items = [p for p in items if (gq in p["name"].lower() or gq in p["desc"].lower())]
 
-    info_lbl.config(text=f"{len(items)} {_('products found')} • {_('Sorted by')} {sort_var.get()}")
+    info_lbl.configure(text=f"{len(items)} {_('products found')} • {_('Sorted by')} {sort_var.get()}")
 
     if not items:
-        empty = ttk.Frame(cards_area.inner, padding=18, relief="solid")
+        empty = ctk.CTkFrame(cards_area.inner, fg_color="#f0f0f0", corner_radius=10)
         empty.grid(row=0, column=0, sticky="ew", padx=8, pady=8)
-        ttk.Label(empty, text=_("No results found"), font=("Arial", 13, "bold")).pack(anchor="w")
-        ttk.Label(empty, text=_("Try changing filters or keywords."), foreground="gray").pack(anchor="w", pady=(6, 0))
+        ctk.CTkLabel(empty, text=_("No matches found. Please select different preferences."), font=("Arial", 13, "bold")).pack(anchor="w", padx=18, pady=18)
         return
 
     cols = 2
@@ -432,70 +668,101 @@ def _render_cards_real():
     cards_area.inner.grid_columnconfigure(0, weight=1)
     cards_area.inner.grid_columnconfigure(1, weight=1)
 
-    for idx, p in enumerate(items):
+    # Tier-based filtering when filters are active
+    if filters_active:
+        # Group by match percentage and exclude 0%
+        tiers = group_by_match_percentage(items)
+        if not tiers:
+            empty = ctk.CTkFrame(cards_area.inner, corner_radius=10)
+            empty.grid(row=0, column=0, sticky="ew", padx=8, pady=8)
+            ctk.CTkLabel(empty, text=_("No matches found. Please select different preferences."), font=("Arial", 13, "bold")).pack(anchor="w", padx=18, pady=18)
+            return
+        
+        # Show tiers up to tiers_to_show
+        items_to_show = []
+        for tier_idx, (match_pct, tier_items) in enumerate(tiers):
+            if tier_idx < tiers_to_show:
+                items_to_show.extend(tier_items)
+        
+        total_tiers = len(tiers)
+        has_more_tiers = tiers_to_show < total_tiers
+    else:
+        items_to_show = items  # Browse all mode: show everything
+        has_more_tiers = False
+        total_tiers = 0
+
+    for idx, p in enumerate(items_to_show):
         r = idx // cols
         c = idx % cols
 
-        card = ttk.Frame(cards_area.inner, padding=13, relief="solid")
+        card = ctk.CTkFrame(cards_area.inner, corner_radius=10, border_width=1)
         card.grid(row=r, column=c, sticky="nsew", padx=6, pady=6)
+        card.grid_columnconfigure(0, weight=1)
 
-        def on_enter(e, w=card):
-            w.configure(relief="raised")
+        ctk.CTkLabel(card, text=p["name"], font=("Arial", 13, "bold"), anchor="w").grid(row=0, column=0, sticky="w", padx=13, pady=(13, 2))
+        ctk.CTkLabel(card, text=f"{_('Match')}: {p['match']}%", text_color="gray", font=("Arial", 10), anchor="w").grid(row=1, column=0, sticky="w", padx=13, pady=(2, 4))
 
-        def on_leave(e, w=card):
-            w.configure(relief="solid")
-
-        card.bind("<Enter>", on_enter)
-        card.bind("<Leave>", on_leave)
-
-        ttk.Label(card, text=p["name"], font=("Arial", 13, "bold")).grid(row=0, column=0, sticky="w")
-        ttk.Label(card, text=f"{_('Match')}: {p['match']}%", foreground="gray", font=("Arial", 10)).grid(row=1, column=0, sticky="w", pady=(2, 4))
-
-        ttk.Label(card, text=p["desc"], wraplength=340, justify="left", font=("Arial", 10)).grid(row=2, column=0, sticky="ew")
+        ctk.CTkLabel(card, text=p["desc"], wraplength=340, justify="left", font=("Arial", 10), anchor="w").grid(row=2, column=0, sticky="ew", padx=13)
 
         notes_text = ", ".join(p["notes"])
-        ttk.Label(card, text=f"{_('Notes')}: {notes_text}", foreground="gray", wraplength=340, justify="left", font=("Arial", 9)).grid(row=3, column=0, sticky="ew", pady=(4, 0))
+        ctk.CTkLabel(card, text=f"{_('Notes')}: {notes_text}", text_color="gray", wraplength=340, justify="left", font=("Arial", 9), anchor="w").grid(row=3, column=0, sticky="ew", padx=13, pady=(4, 0))
 
-        btns = ttk.Frame(card)
-        btns.grid(row=4, column=0, sticky="w", pady=(8, 0))
-        ttk.Button(btns, text=_("View"), command=lambda prod=p: show_product_popup(prod)).pack(side="left")
+        btns = ctk.CTkFrame(card, fg_color="transparent")
+        btns.grid(row=4, column=0, sticky="w", padx=13, pady=(8, 13))
+        ctk.CTkButton(btns, text=_("View"), command=lambda prod=p: show_product_popup(prod), width=80).pack(side="left")
+
+    # Show buttons when filters are active
+    if filters_active:
+        row_btn = (len(items_to_show) + cols - 1) // cols
+        buttons_frame = ctk.CTkFrame(cards_area.inner, fg_color="transparent")
+        buttons_frame.grid(row=row_btn, column=0, columnspan=cols, sticky="ew", padx=6, pady=(4, 10))
+        
+        # Show similar button (for loose note matching) if strict mode and notes were selected
+        if strict_notes and fnotes.strip():
+            ctk.CTkButton(buttons_frame, text=_("Show similar"), 
+                      command=lambda: render_cards(tiers_to_show=1, strict_notes=False), width=120).pack(side="left", padx=5)
+        
+        # Show more button (for next tier) if there are more tiers
+        if has_more_tiers:
+            next_tier_count = tiers_to_show + 1
+            ctk.CTkButton(buttons_frame, text=_("Show more"), 
+                      command=lambda: render_cards(tiers_to_show=next_tier_count, strict_notes=strict_notes), width=120).pack(side="left", padx=5)
 
 
-def render_cards():
+def render_cards(tiers_to_show=1, strict_notes=True):
     progress.grid()
-    progress.start(10)
-    root.after(350, _render_cards_real)
+    progress.set(0)  # Reset progress bar
+    root.after(350, lambda: _render_cards_real(tiers_to_show, strict_notes))
 
 
 def reset_filters():
-    name_var.set("")
-    notes_var.set("")
-    global_search_var.set(placeholder)
+    notes_widget.clear_selection()  # Clear checkbox selections
+    global_search_var.set("")
 
-    gender_filter["combo"].current(0)
-    intensity_filter["combo"].current(0)
-    season_filter["combo"].current(0)
-    concept_filter["combo"].current(0)
-    classification_filter["combo"].current(0)
-    longevity_filter["combo"].current(0)
+    # Reset comboboxes to their defaults
+    for filt in [gender_filter, intensity_filter, season_filter, concept_filter, longevity_filter]:
+        translated = translate_list(filt["values"])
+        filt["combo"].set(translated[filt["default"]])
     render_cards()
 
 
-side_btns = ttk.Frame(sidebar)
-side_btns.grid(row=30, column=0, sticky="ew", pady=(16, 0))
+side_btns = ctk.CTkFrame(sidebar, fg_color="transparent")
+side_btns.grid(row=30, column=0, sticky="ew", pady=(16, 0), padx=10)
 side_btns.columnconfigure(0, weight=1)
 side_btns.columnconfigure(1, weight=1)
 
-reset_btn = ttk.Button(side_btns, text=_("Reset"), command=reset_filters)
-reset_btn.grid(row=0, column=0, sticky="ew", padx=(0, 8))
-apply_btn = ttk.Button(side_btns, text=_("Apply Filters"), command=render_cards)
-apply_btn.grid(row=0, column=1, sticky="ew")
-
+reset_btn = ctk.CTkButton(side_btns, text=_("Reset"), command=reset_filters)
+reset_btn.grid(row=0, column=0, sticky="ew", padx=(0, 5))
+apply_btn = ctk.CTkButton(side_btns, text=_("Apply Filters"), command=render_cards)
+apply_btn.grid(row=0, column=1, sticky="ew", padx=(5, 0))
 
 sort_cb.bind("<<ComboboxSelected>>", lambda e: render_cards())
 global_search_entry.bind("<Return>", lambda e: render_cards())
-name_entry.bind("<Return>", lambda e: render_cards())
-notes_entry.bind("<Return>", lambda e: render_cards())
+
+# Populate notes widget with all available notes
+all_products = load_products_from_db()
+all_notes = get_unique_notes_from_products(all_products)
+notes_widget.set_options(all_notes)
 
 # Bind mousewheel to root and check if mouse is over cards area
 def _on_root_mousewheel(event):
@@ -542,36 +809,51 @@ def open_database():
     db_window.grab_set()
 
 
-db_header_btn.config(command=open_database)
+db_header_btn.configure(command=open_database)
 
 def update_ui():
     root.title(_("Perfume Recommender"))
-    title_label.config(text=_("Perfume Recommender"))
-    subtitle.config(text=_("Browse and filter perfumes. Use the sidebar to narrow results."))
-    filters_title.config(text=_("Filters"))
-    perfume_name_label.config(text=_("Perfume name"))
-    notes_label.config(text=_("Ingredients / Notes (keyword)"))
-    header_title.config(text=_("Perfume Recommender"))
-    db_header_btn.config(text=_("Open Perfume DB"))
-    reset_btn.config(text=_("Reset"))
-    apply_btn.config(text=_("Apply Filters"))
+    title_label.configure(text=_("Perfume Recommender"))
+    subtitle.configure(text=_("Browse and filter perfumes. Use the sidebar to narrow results."))
+    filters_title.configure(text=_("Filters"))
+    header_title.configure(text=_("Perfume Recommender"))
+    db_header_btn.configure(text=_("Open Perfume DB"))
+    reset_btn.configure(text=_("Reset"))
+    apply_btn.configure(text=_("Apply Filters"))
     # Update combo labels and values with translations
     for filt, label_key in [
         (gender_filter, "Gender"),
         (intensity_filter, "Intensity"),
         (season_filter, "Season"),
         (concept_filter, "Concept"),
-        (classification_filter, "Classification"),
         (longevity_filter, "Longevity"),
     ]:
-        filt["label"].config(text=_(label_key))
-        idx = filt["combo"].current()
-        if idx < 0:
+        filt["label"].configure(text=_(label_key))
+        # CTkComboBox doesn't support .current(); use value-based selection
+        try:
+            current_values = filt["combo"].cget("values")
+        except Exception:
+            current_values = []
+        current_value = None
+        try:
+            current_value = filt["combo"].get()
+        except Exception:
+            current_value = None
+        if current_value in current_values:
+            idx = current_values.index(current_value)
+        else:
             idx = 0
         translated_values = translate_list(filt["values"])
-        filt["combo"]["values"] = translated_values
-        if idx < len(translated_values):
-            filt["combo"].current(idx)
+        try:
+            # Set new values list for CTkComboBox
+            filt["combo"].configure(values=translated_values)
+        except Exception:
+            # Fallback to mapping-style if available
+            try:
+                filt["combo"]["values"] = translated_values
+            except Exception:
+                pass
+        if 0 <= idx < len(translated_values):
             try:
                 filt["combo"].set(translated_values[idx])
             except Exception:
@@ -582,7 +864,7 @@ def update_ui():
     if global_search_var.get() in (old_placeholder, old_placeholder.lower()):
         global_search_entry.delete(0, tk.END)
         global_search_entry.insert(0, placeholder)
-    lang_btn.config(text=get_toggle_label())
+    lang_btn.configure(text=get_toggle_label())
     # Re-render cards to update "View" button text and product details
     _render_cards_real()
 
@@ -592,7 +874,7 @@ def on_toggle_lang():
     update_ui()
 
 
-lang_btn.config(command=on_toggle_lang)
+lang_btn.configure(command=on_toggle_lang)
 
 
 def show_help():
@@ -601,10 +883,11 @@ def show_help():
 Perfume Recommender Application Help
 
 Instructions:
-1. Use the left sidebar filters (gender, intensity, season, concept, classification, longevity, name, notes) to refine results.
-2. Use the top search box to search within results and the sort box to change ordering.
-3. Click a card's View button to see details, or "Open Perfume DB" to manage the database.
-4. Use the menu bar for Language, Database, and Help options.
+1. Use the left sidebar filters (gender, intensity, season, concept, longevity) to refine results.
+2. Click "Show Relevant Notes" button to see notes matching your current filters. Check boxes for multiple notes.
+3. "Apply Filters" shows exact matches. Use "Show similar" to see perfumes with at least one matching note.
+4. "Show more" reveals additional match tiers. Use the top search box and sort options as needed.
+5. Click a card's View button to see details, or "Open Perfume DB" to manage the database.
 
 Keyboard Shortcuts (database window):
 • Ctrl+I: Add new perfume
