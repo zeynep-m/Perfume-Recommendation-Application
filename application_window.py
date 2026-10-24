@@ -8,6 +8,7 @@ from ListPerfumes import ListPerfumes
 from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label, translate_list
 from domain.matching import filter_rank_products
+from domain.models import Perfume
 from ui.widgets import MultiSelectCheckbox, ScrollableFrame
 
 # Set CustomTkinter appearance
@@ -118,19 +119,19 @@ def create_window(db=None):
             desc_text = " - ".join(desc_parts) if desc_parts else str(perfume)
 
             products.append(
-                {
-                    "id": _pid,
-                    "name": _safe_value(perfume, "Unnamed"),
-                    "gender": _safe_value(gender, "Unisex"),
-                    "intensity": _safe_value(intensity, "Moderate"),
-                    "notes": notes_list,
-                    "season": _safe_value(season, "Summer"),
-                    "concept": _safe_value(concept, "Daily"),
-                    "classification": _safe_value(classification, "Fresh"),
-                    "longevity": _safe_value(longevity, "Moderate"),
-                    "collection": _safe_value(collection, ""),
-                    "desc": _safe_value(desc_text, ""),
-                }
+                Perfume(
+                    id=_pid,
+                    name=_safe_value(perfume, "Unnamed"),
+                    gender=_safe_value(gender, "Unisex"),
+                    intensity=_safe_value(intensity, "Moderate"),
+                    notes=notes_list,
+                    season=_safe_value(season, "Summer"),
+                    concept=_safe_value(concept, "Daily"),
+                    classification=_safe_value(classification, "Fresh"),
+                    longevity=_safe_value(longevity, "Moderate"),
+                    collection=_safe_value(collection, ""),
+                    desc=_safe_value(desc_text, ""),
+                ).to_product_dict()
             )
 
         return products
