@@ -3,13 +3,18 @@ import customtkinter as ctk
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
 from i18n import _
+from infrastructure.repository_protocol import PerfumeRepositoryProtocol
 
 
 class AddNewPerfume(PerfumeFormWindow):
     """Window for adding a new perfume"""
     
-    def __init__(self, parent=None):
-        super().__init__(parent, _("Add New Perfume"))
+    def __init__(
+        self,
+        parent=None,
+        db: PerfumeRepositoryProtocol | None = None,
+    ):
+        super().__init__(parent, _("Add New Perfume"), db=db)
 
     def build_ui(self):
         super().build_ui()

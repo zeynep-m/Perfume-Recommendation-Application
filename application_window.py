@@ -9,7 +9,9 @@ from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label, translate_list
 from domain.matching import filter_rank_products
 from domain.models import Perfume
-from ui.widgets import MultiSelectCheckbox, ScrollableFrame
+from ui.filter_panel import FilterPanel
+from ui.product_card import ProductCardView
+from ui.widgets import ScrollableFrame
 
 # Set CustomTkinter appearance
 ctk.set_appearance_mode("system")  # Modes: system, light, dark
@@ -164,56 +166,21 @@ def create_window(db=None):
 
     root.geometry("1120x690")
 
-    # Filter option sets (logic uses English values)
-    gender_values = ["Any", "Woman", "Man", "Unisex"]
-    intensity_values = ["Any", "Light", "Moderate", "Intense"]
-    season_values = ["Any", "Summer", "Winter", "Spring", "Autumn"]
-    concept_values = ["Any", "Daily", "Office", "Night Out", "Sport"]
-    longevity_values = ["Any", "Short", "Moderate", "Long"]
-
-
     main_container = ctk.CTkFrame(root, fg_color="transparent")
     main_container.pack(fill="both", expand=True)
     main_container.columnconfigure(0, weight=0)
     main_container.columnconfigure(1, weight=1)
     main_container.rowconfigure(0, weight=1)
 
-    sidebar = ctk.CTkFrame(main_container, width=240, corner_radius=10)
-    sidebar.grid(row=0, column=0, sticky="nsw", padx=(10, 5), pady=10)
-    sidebar.columnconfigure(0, weight=1)
-    sidebar.grid_propagate(False)
-
-    filters_title = ctk.CTkLabel(sidebar, text=_("Filters"), font=("Arial", 16, "bold"))
-    filters_title.grid(row=0, column=0, sticky="w", pady=(0, 10), padx=10)
-
-
-    def add_filter(r, label, values, default_idx):
-        lbl = ctk.CTkLabel(sidebar, text=_(label), anchor="w")
-        lbl.grid(row=r, column=0, sticky="w", pady=(10, 2), padx=10)
-        var = tk.StringVar()
-        translated = translate_list(values)
-        cb = ctk.CTkComboBox(sidebar, variable=var, state="readonly", values=translated, width=200)
-        cb.set(translated[default_idx])
-        cb.grid(row=r + 1, column=0, sticky="ew", padx=10)
-        return {"label": lbl, "combo": cb, "values": values, "default": default_idx}
-
-
-    gender_filter = add_filter(1, "Gender", gender_values, 0)
-    intensity_filter = add_filter(3, "Intensity", intensity_values, 0)
-    season_filter = add_filter(5, "Season", season_values, 0)
-    concept_filter = add_filter(7, "Concept", concept_values, 0)
-    longevity_filter = add_filter(9, "Longevity", longevity_values, 0)
-
-    # Create frame for notes checkboxes with scrollbar
-    notes_frame = ctk.CTkScrollableFrame(sidebar, height=120, fg_color="transparent")
-    notes_frame.grid(row=11, column=0, sticky="ew", pady=(10, 10), padx=10)
-    notes_frame.columnconfigure(0, weight=1)
-
-    notes_inner = notes_frame  # For compatibility
-
-    # Notes multi-select widget will be populated after functions are defined
-    notes_widget = MultiSelectCheckbox(notes_inner, options=[])
-    notes_widget.pack(fill="both", expand=True)
+    filter_panel = FilterPanel(main_container)
+    sidebar = filter_panel.frame
+    filters_title = filter_panel.title
+    gender_filter = filter_panel.gender
+    intensity_filter = filter_panel.intensity
+    season_filter = filter_panel.season
+    concept_filter = filter_panel.concept
+    longevity_filter = filter_panel.longevity
+    notes_widget = filter_panel.notes
 
     content = ctk.CTkFrame(main_container, corner_radius=10)
     content.grid(row=0, column=1, sticky="nsew", padx=(5, 10), pady=10)
@@ -541,21 +508,8 @@ def create_window(db=None):
             r = idx // cols
             c = idx % cols
 
-            card = ctk.CTkFrame(cards_area.inner, corner_radius=10, border_width=1)
-            card.grid(row=r, column=c, sticky="nsew", padx=6, pady=6)
-            card.grid_columnconfigure(0, weight=1)
-
-            ctk.CTkLabel(card, text=p["name"], font=("Arial", 13, "bold"), anchor="w").grid(row=0, column=0, sticky="w", padx=13, pady=(13, 2))
-            ctk.CTkLabel(card, text=f"{_('Match')}: {p['match']}%", text_color="gray", font=("Arial", 10), anchor="w").grid(row=1, column=0, sticky="w", padx=13, pady=(2, 4))
-
-            ctk.CTkLabel(card, text=p["desc"], wraplength=340, justify="left", font=("Arial", 10), anchor="w").grid(row=2, column=0, sticky="ew", padx=13)
-
-            notes_text = ", ".join(p["notes"])
-            ctk.CTkLabel(card, text=f"{_('Notes')}: {notes_text}", text_color="gray", wraplength=340, justify="left", font=("Arial", 9), anchor="w").grid(row=3, column=0, sticky="ew", padx=13, pady=(4, 0))
-
-            btns = ctk.CTkFrame(card, fg_color="transparent")
-            btns.grid(row=4, column=0, sticky="w", padx=13, pady=(8, 13))
-            ctk.CTkButton(btns, text=_("View"), command=lambda prod=p: show_product_popup(prod), width=80).pack(side="left")
+            card = ProductCardView(cards_area.inner, p, show_product_popup)
+            card.card.grid(row=r, column=c, sticky="nsew", padx=6, pady=6)
 
         # Show buttons when filters are active
         if filters_active:

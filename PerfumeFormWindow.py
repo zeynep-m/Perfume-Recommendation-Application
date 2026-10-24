@@ -5,6 +5,7 @@ from tkinter import scrolledtext
 import customtkinter as ctk
 from perfume_db import PerfumeDatabase
 from i18n import _
+from infrastructure.repository_protocol import PerfumeRepositoryProtocol
 
 # Configure CustomTkinter theme
 ctk.set_appearance_mode("system")
@@ -14,7 +15,12 @@ ctk.set_default_color_theme("green")
 class PerfumeFormWindow(ctk.CTkToplevel):
     """Base form class for Add/Edit perfume windows"""
     
-    def __init__(self, parent=None, title="Perfume Form"):
+    def __init__(
+        self,
+        parent=None,
+        title="Perfume Form",
+        db: PerfumeRepositoryProtocol | None = None,
+    ):
         super().__init__(parent)
         self.withdraw()
         self.title(_(title))
@@ -43,7 +49,7 @@ class PerfumeFormWindow(ctk.CTkToplevel):
         # Track required fields for validation highlighting
         self.required_fields = {}
         
-        self.db = PerfumeDatabase()
+        self.db: PerfumeRepositoryProtocol = db or PerfumeDatabase()
         self.build_ui()
         try:
             self._center_on_parent(parent)

@@ -3,18 +3,24 @@ import customtkinter as ctk
 from PerfumeFormWindow import PerfumeFormWindow
 import sqlite3
 from i18n import _
+from infrastructure.repository_protocol import PerfumeRepositoryProtocol
 
 
 class EditPerfume(PerfumeFormWindow):
     """Window for editing an existing perfume"""
     
-    def __init__(self, parent, perfume_data):
+    def __init__(
+        self,
+        parent,
+        perfume_data,
+        db: PerfumeRepositoryProtocol | None = None,
+    ):
         """
         Initialize edit window with existing perfume data
         perfume_data is a tuple from the database with all fields
         """
         self.perfume_id = perfume_data[0]
-        super().__init__(parent, _("Edit Perfume"))
+        super().__init__(parent, _("Edit Perfume"), db=db)
         
         # Populate fields with existing data
         self.perfume.set(perfume_data[1])

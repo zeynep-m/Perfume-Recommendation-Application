@@ -8,6 +8,7 @@ import EditPerfume
 from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label
 from datetime import datetime
+from infrastructure.repository_protocol import PerfumeRepositoryProtocol
 
 # Configure CustomTkinter theme
 ctk.set_appearance_mode("system")
@@ -17,11 +18,11 @@ ctk.set_default_color_theme("green")
 class ListPerfumes(ctk.CTkToplevel):
     """Child window for displaying perfumes in a Treeview"""
 
-    def __init__(self, parent, db=None):
+    def __init__(self, parent, db: PerfumeRepositoryProtocol | None = None):
         super().__init__(parent)
         self.title(_("Perfume Recommendation Application"))
         self.geometry("1600x600")  # Wider window for more columns
-        self.db = db or PerfumeDatabase()
+        self.db: PerfumeRepositoryProtocol = db or PerfumeDatabase()
         self.build_ui()
         self.list_perfumes()
         self.update_ui()
@@ -268,7 +269,7 @@ class ListPerfumes(ctk.CTkToplevel):
 
     def show_add_window(self, event=None):
         """Show window to add a new perfume"""
-        add_win = AddNewPerfume.AddNewPerfume(parent=self)
+        add_win = AddNewPerfume.AddNewPerfume(parent=self, db=self.db)
         # Listen for custom save event
         add_win.bind("<<PerfumeSaved>>", self._on_perfume_saved)
 
@@ -292,7 +293,11 @@ class ListPerfumes(ctk.CTkToplevel):
         
         if perfume_data:
             # Open edit window
-            edit_win = EditPerfume.EditPerfume(parent=self, perfume_data=perfume_data)
+            edit_win = EditPerfume.EditPerfume(
+                parent=self,
+                perfume_data=perfume_data,
+                db=self.db,
+            )
             # Listen for custom update event
             edit_win.bind("<<PerfumeUpdated>>", self._on_perfume_updated)
 
