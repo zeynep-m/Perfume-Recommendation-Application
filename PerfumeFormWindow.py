@@ -3,7 +3,6 @@ from tkinter import ttk
 from tkinter import messagebox as msg
 from tkinter import scrolledtext
 import customtkinter as ctk
-import sqlite3
 from perfume_db import PerfumeDatabase
 from i18n import _
 

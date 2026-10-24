@@ -7,7 +7,7 @@ import os
 # Add the current directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from i18n import _, toggle_lang, _load_language
+from i18n import _, _load_language
 
 # Test English (default)
 print("=== English (Default) ===")

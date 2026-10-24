@@ -7,190 +7,23 @@ import customtkinter as ctk
 from ListPerfumes import ListPerfumes
 from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label, translate_list
+from domain.matching import filter_rank_products
+from ui.widgets import MultiSelectCheckbox, ScrollableFrame
 
 # Set CustomTkinter appearance
 ctk.set_appearance_mode("system")  # Modes: system, light, dark
 ctk.set_default_color_theme("green")  # Themes: blue, dark-blue, green
 
 
-# ----------------------------
-# Matching and data helpers
-# ----------------------------
-
 def _safe_value(value, fallback):
-    return value if (value is not None and str(value).strip()) else fallback
+    return value if value is not None and str(value).strip() else fallback
 
 
 def _split_notes(notes_text):
     if not notes_text:
         return []
-    return [n.strip() for n in str(notes_text).split(",") if n.strip()]
+    return [note.strip() for note in str(notes_text).split(",") if note.strip()]
 
-
-def parse_selected_notes(notes_input):
-    """Parse comma-separated notes input into list of individual notes"""
-    if not notes_input or not notes_input.strip():
-        return []
-    return [n.strip() for n in notes_input.split(",") if n.strip()]
-
-
-def matches_notes(perfume_notes, selected_notes, strict=True):
-    """Check if perfume notes match selected notes.
-    strict=True: ALL selected notes must be in perfume notes
-    strict=False: AT LEAST ONE selected note must be in perfume notes
-    """
-    if not selected_notes:
-        return True
-    
-    perfume_notes_lower = [n.lower() for n in perfume_notes]
-    
-    if strict:
-        # All selected notes must be present
-        for note in selected_notes:
-            if not any(note.lower() in pn for pn in perfume_notes_lower):
-                return False
-        return True
-    else:
-        # At least one selected note must be present
-        for note in selected_notes:
-            if any(note.lower() in pn for pn in perfume_notes_lower):
-                return True
-        return False
-
-
-def match_score(prod, profile, notes_selected, strict_notes=True):
-    """Calculate match score using Java-style logic.
-    Returns: (tier, score, total) or None if filtered out
-    tier 1 = exact match (all filters match)
-    tier 2 = close match (2+ out of 3 non-Any filters match)
-    tier 3 = loose match with notes
-    tier 4 = very loose
-    """
-    score = 0
-    total = 0
-    filters_checked = []
-
-    # Check each basic filter
-    if profile["gender"] != "Any":
-        filters_checked.append("gender")
-        total += 1
-        if profile["gender"] == "Unisex" or prod["gender"] == "Unisex" or prod["gender"] == profile["gender"]:
-            score += 1
-
-    if profile["intensity"] != "Any":
-        filters_checked.append("intensity")
-        total += 1
-        if prod["intensity"] == profile["intensity"]:
-            score += 1
-
-    if profile["season"] != "Any":
-        filters_checked.append("season")
-        total += 1
-        if prod["season"] == profile["season"]:
-            score += 1
-
-    if profile["concept"] != "Any":
-        filters_checked.append("concept")
-        total += 1
-        if prod["concept"] == profile["concept"]:
-            score += 1
-
-    if profile["longevity"] != "Any":
-        filters_checked.append("longevity")
-        total += 1
-        if prod["longevity"] == profile["longevity"]:
-            score += 1
-
-    # Check notes matching
-    notes_match = matches_notes(prod["notes"], notes_selected, strict=strict_notes)
-    if not notes_match:
-        return None
-
-    # Determine tier based on score
-    total = total or 1
-    match_pct = int((score / total) * 100)
-    
-    if match_pct == 100:
-        tier = 1  # Exact match
-    elif score >= 2 or match_pct >= 67:
-        tier = 2  # Close match (at least 2 out of 3)
-    else:
-        tier = 3  # Loose match
-    
-    return tier, score, total, match_pct
-
-
-def filter_rank_products(profile, notes_input, sort_mode, products, strict_notes=True):
-    """Filter and rank products using Java-style matching logic."""
-    notes_selected = parse_selected_notes(notes_input)
-    scored = []
-    
-    for p in products:
-        ms = match_score(p, profile, notes_selected, strict_notes=strict_notes)
-        if ms is None:
-            continue
-        tier, score, total, match_pct = ms
-        scored.append({**p, "match": match_pct, "_score": score, "_tier": tier})
-
-    # Sort by tier first, then by score
-    if sort_mode == _("Best match"):
-        scored.sort(key=lambda x: (x["_tier"], -x["_score"]))
-    elif sort_mode == _("Name A-Z"):
-        scored.sort(key=lambda x: x["name"])
-    elif sort_mode == _("Name Z-A"):
-        scored.sort(key=lambda x: x["name"], reverse=True)
-
-    return scored
-
-
-class ScrollableFrame(ctk.CTkScrollableFrame):
-    def __init__(self, container):
-        super().__init__(container, fg_color="transparent")
-        self.inner = self  # For compatibility with existing code
-
-
-class MultiSelectCheckbox(ctk.CTkFrame):
-    """Multi-select widget using checkboxes, similar to radiobuttons in layout"""
-    def __init__(self, parent, options=None):
-        super().__init__(parent, fg_color="transparent")
-        self.var_dict = {}  # {option: BooleanVar}
-        self.options = options or []
-        self.build_ui()
-    
-    def build_ui(self):
-        """Build checkbox layout"""
-        for option in self.options:
-            var = tk.BooleanVar(value=False)
-            self.var_dict[option] = var
-            cb = ctk.CTkCheckBox(self, text=option, variable=var)
-            cb.pack(anchor="w", pady=2)
-    
-    def set_options(self, options):
-        """Update available options and rebuild checkboxes"""
-        # Clear existing checkboxes
-        for widget in self.winfo_children():
-            widget.destroy()
-        
-        # Store current selections
-        current_selections = self.get_selected()
-        
-        self.var_dict.clear()
-        self.options = options
-        self.build_ui()
-        
-        # Restore previous selections if they still exist in new options
-        for selection in current_selections:
-            if selection in self.var_dict:
-                self.var_dict[selection].set(True)
-    
-    def get_selected(self):
-        """Return list of selected options"""
-        return [opt for opt, var in self.var_dict.items() if var.get()]
-    
-    def clear_selection(self):
-        """Deselect all options"""
-        for var in self.var_dict.values():
-            var.set(False)
 
 # ----------------------------
 # Main Window (Filters)
@@ -646,7 +479,14 @@ def _render_cards_real(tiers_to_show=1, strict_notes=True):
         ctk.CTkLabel(empty, text=_("No data in database"), font=("Arial", 13, "bold")).pack(anchor="w", padx=18, pady=18)
         return
 
-    items = filter_rank_products(profile, fnotes, sort_var.get(), products, strict_notes=strict_notes)
+    items = filter_rank_products(
+        profile,
+        fnotes,
+        sort_var.get(),
+        products,
+        _,
+        strict_notes=strict_notes,
+    )
 
     if gq:
         items = [p for p in items if (gq in p["name"].lower() or gq in p["desc"].lower())]
@@ -926,4 +766,19 @@ db_menu = tk.Menu(menubar, tearoff=0)
 menubar.add_cascade(label=_("Database"), menu=db_menu)
 db_menu.add_command(label=_("Open Perfume DB"), command=menu_open_db)
 
-root.mainloop()
+class MainWindow:
+    """Facade for the configured recommendation window."""
+
+    def __init__(self, tk_root):
+        self.root = tk_root
+
+    def mainloop(self):
+        self.root.mainloop()
+
+    def destroy(self):
+        self.root.destroy()
+
+
+def create_window():
+    """Build and return the configured recommendation window."""
+    return MainWindow(root)

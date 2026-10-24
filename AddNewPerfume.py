@@ -1,4 +1,3 @@
-from tkinter import ttk
 from tkinter import messagebox as msg
 import customtkinter as ctk
 from PerfumeFormWindow import PerfumeFormWindow

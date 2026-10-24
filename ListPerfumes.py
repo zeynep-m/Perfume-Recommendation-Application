@@ -8,7 +8,6 @@ import EditPerfume
 from perfume_db import PerfumeDatabase
 from i18n import _, toggle_lang, get_toggle_label
 from datetime import datetime
-import locale
 
 # Configure CustomTkinter theme
 ctk.set_appearance_mode("system")
@@ -61,7 +60,7 @@ class ListPerfumes(ctk.CTkToplevel):
         self.search_label.pack(side="left", padx=5)
         
         self.search_var = tk.StringVar()
-        self.search_var.trace("w", self.on_search_change)
+        self.search_var.trace_add("write", self.on_search_change)
         search_entry = ctk.CTkEntry(search_frame, textvariable=self.search_var, width=200)
         search_entry.pack(side="left", padx=5)
 
